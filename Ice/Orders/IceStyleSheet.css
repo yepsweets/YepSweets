@@ -1,0 +1,49 @@
+﻿
+
+.ui-page {
+    background-color: #93B874;
+}
+
+#map-canvas {
+    width: 200px;
+    height: 200px;
+    padding: 0;
+}
+.hide {
+    display:none;
+}
+
+#map0, #map1, #map2, #map3, #map4, #map5 {
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    margin:0;
+}
+
+.mytab {
+    width: 33.3% !important;
+    clear: none !important; /* Prevent line break caused by ui-block-a */
+}
+
+
+#slideshow { 
+    margin: 50px auto; 
+    position: relative; 
+    width: 170px; 
+    height: 170px; 
+    padding: 10px; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.4); 
+}
+
+#slideshow > div { 
+    position: absolute; 
+    top: 10px; 
+    left: 10px; 
+    width:inherit;/**/
+    height:inherit;/**/
+    right: 10px; 
+    bottom: 10px; 
+}
+
+
+

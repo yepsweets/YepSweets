@@ -1,0 +1,190 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="Styles/IceStyleSheet.css" />
+    <script src="https://code.jquery.com/jquery-1.11.3.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="Scripts/IceJavaScript.js"></script>
+</head>
+
+<body>
+    <!-- index page -->
+    <div data-role="page" id="index">
+        <!--Header-->
+        <div data-role="header">
+            <a href="#index" data-role="button" data-mini="true" data-inline="true" data-icon="home" data-iconpos="notext"
+               style="margin:0px;padding:0px;margin-bottom:20px;"></a>
+            <div id="head" align="center"></div>
+            <a href="#" data-role="button" data-mini="true" data-inline="true" data-icon="back" data-iconpos="notext"
+               style="margin:0px;padding:0px;margin-bottom:20px;"></a>
+        </div>
+        <!--Content-->
+        <div data-role="content">
+            <div id="slideshow">
+                <div>
+                    <img src="images/ice_cocktail.jpg" style="width:inherit" />
+                </div>
+                <div>
+                    <img src="images/tastes.jpg" style="width:inherit" />
+                </div>
+                <div>
+                    <img src="images/ice_coffee.jpg" style="width:inherit" />
+                </div>
+            </div>
+            <center>
+                Select Products:
+                <select id="ddlSelectProduct" >
+                    <option value="" disabled selected hidden></option>
+                    <!-- Products are added here -->
+                </select>
+            </center>
+        </div>
+        <!--Footer-->
+        <div data-role="footer" data-position="fixed" data-theme="b">
+            <h5>@ YEP (Yoad, Elisha, Pinchas)</h5>
+        </div>
+
+        <!--IceCream popup -->
+        <div data-role="popup" id="puIceCream">
+            <div>
+                <center>Select Number of Flavors:</center>
+                <select id="ddlNumFlavorsIC">
+                    <option value="" disabled selected hidden></option>
+                    <!--Number of flavors is added here-->
+                </select>
+            </div>
+            <div id="ddlFlavorContainerIC">
+                <div id="1FlavorIC" class="hide">
+                    <center>Select 1st Flavor:</center>
+                    <!--<label onformchange="ddlFlavorIC1" value="Please Choose...">Please Choose...</label>-->
+                    <select id="ddlFlavorsIC1">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+                <div id="2FlavorIC" class="hide">
+                    <!--<label onformchange="ddlFlavorIC2" value="Please Choose...">Please Choose...</label>-->
+                    <center>Select 2nd Flavor:</center>
+                    <select id="ddlFlavorsIC2">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+                <div id="3FlavorIC" class="hide">
+                    <center>Select 3rd Flavor:</center>
+                    <!--<label onformchange="ddlFlavorIC3" value="Please Choose...">Please Choose...</label>-->
+                    <select id="ddlFlavorsIC3">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+                <div id="4FlavorIC" class="hide">
+                    <center>Select 4th Flavor:</center>
+                    <!--<label onformchange="ddlFlavorIC4" value="Please Choose...">Please Choose...</label>-->
+                    <select id="ddlFlavorsIC4">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+            </div>
+            <div>
+                <center>Select Add-Ons:</center>
+                <select id="ddlAddOnsIC">
+                    <option value="" disabled selected hidden></option>
+                    <!--Add ons are added here-->
+                </select>
+            </div>
+            <div>
+                <center><a href="#" data-role="button">Add to Cart</a></center>
+            </div>
+        </div>
+        <!-- End of Icecream popup-->
+        <!--Milkshake popup -->
+        <div data-role="popup" id="puMilkshake">
+            <div id="ddlFlavorContainerMS">
+                <div>
+                    <center>Select 1st Flavor:</center>
+                    <select id="ddlFlavorsMS1">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+                <div>
+                    <center>Select 2nd Flavor:</center>
+                    <select id="ddlFlavorsMS2">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+            </div>
+            <div>
+                <center>Select Add-Ons:</center>
+                <select id="ddlAddOnsMS">
+                    <option value="" disabled selected hidden></option>
+                    <!--Add ons are added here-->
+                </select>
+            </div>
+            <div>
+                <center><a href="#" data-role="button">Add to Cart</a></center>
+            </div>
+        </div>
+        <!-- End of Milkshake popup-->
+        <!--FrozenYogurt popup -->
+        <div data-role="popup" id="puFrozenYogurt">
+            <div>
+                <center>Select Size:</center>
+                <select id="ddlSizeFY" >
+                    <option value="" disabled selected hidden></option>
+                    <!--Sizes are added here-->
+                </select>
+            </div>
+            <div id="ddlFlavorContainerFY">
+                <div>
+                    <center>Select 1st Flavor:</center>
+                    <select id="ddlFlavorsFY1">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+                <div>
+                    <center>Select 2nd Flavor:</center>
+                    <select id="ddlFlavorsFY2">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+                <div>
+                    <center>Select 3rd Flavor:</center>
+                    <select id="ddlFlavorsFY3">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+                <div>
+                    <center>Select 4th Flavor:</center>
+                    <select id="ddlFlavorsFY4">
+                        <option value="" disabled selected hidden></option>
+                        <!--Flavors are added here-->
+                    </select>
+                </div>
+            </div>
+            <div>
+                <center>Select Add-Ons:</center>
+                <select id="ddlAddOnsFY">
+                    <option value="" disabled selected hidden></option>
+                    <!--Add ons are added here-->
+                </select>
+            </div>
+            <div>
+                <center><a href="#" data-role="button">Add to Cart</a></center>
+            </div>
+        </div>
+        <!-- End of FrozenYogurt popup-->
+    </div>
+    <!--End of index page--> 
+   
+</body>
+</html>
