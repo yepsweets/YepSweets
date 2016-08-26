@@ -117,22 +117,23 @@ function buildPopup() {
     string = $('<div>').attr({ 'data-role': 'popup', 'data-history': 'false', id: 'signIn', 'class': "ui-corner-all", 'data-position-to': 'window', 'data-transition': "turn" })
         .html(
             $('<div>').attr({ class: 'myPop' })
-        .html($('<h3>').text('Please sign in'))
+        .html($('<h3>').text('Please sign in')
         .append(
             $('<label>').attr({ for: "txtLoginUserName", class: "ui-hidden-accessible" }).text('User Name: ')
             )
         .append(
-            $('<input>').attr({ type: "text", name: "txtLoginUserName", id: "txtLoginUserName", placeholder: 'username', 'data-theme': "a" })
-            )
+            $('<div>').append($('<input>').attr({ type: "text", name: "txtLoginUserName", id: "txtLoginUserName", placeholder: 'username', 'data-theme': "a" })).append($('<p>').text('* User Name is required.').attr({id:'errUsername',class:"errLogIn"}).hide())
+        )
         .append(
             $('<label>').attr({ for: "txtUserPassword", class: "ui-hidden-accessible" }).text('Password: ')
             )
         .append(
-            $('<input>').attr({ type: "password", name: "txtLoginPassword", id: "txtLoginPassword", placeholder: "password", 'data-theme': "a" })
+            $('<div>').append($('<input>').attr({ type: "password", name: "txtLoginPassword", id: "txtLoginPassword", placeholder: "password", 'data-theme': "a" })).append($('<p>').text('* Password is required.').attr({id:'errPassword',class:"errLogIn"}).hide())
             )
         .append(
             $('<a>').attr({ id: "btnLogin", class: "ui-btn Mybtn" }).text('Sing In')
-            )).prop('outerHTML');
+            ))).prop('outerHTML');
+   
     //string = '<div data-role="popup" data-history="false" id="signIn" class="ui-corner-all" data-position-to="window" data-transition="turn">' +
     //   '' +
     //       ' <div class="myPop">' +
@@ -145,6 +146,8 @@ function buildPopup() {
     //        '</div>' +
     //    '' +
     //'</div>';
+
+
     return string;
 } //this function return popup as string
 function istAjaxValidateRequest(func, user) {
@@ -276,28 +279,26 @@ function fillUserOrders(user) {
 } //this function manage ths myorders page data.
 
 function validateLogIn(user) {
-    var res = true
+    var res = true;
     if (user.Email == "" || user.Email == undefined) {
-        if ($('#txtLoginUserName').after().prop('tagName') != 'SPAN') {
-            $('#txtLoginUserName').after($('<span class="errorMsg">').text("* User Name is required."));
-        }
+        $('#errUsername').show();   
+        $('#txtLoginUserName').addClass('txtBoxErr'); 
         res = false;
     }
-    else {
-        if ($('#txtLoginUserName').after().prop('tagName') == 'SPAN') {
-            $('#txtLoginUserName').after().remove();
-        }
-    }
-    if (user.Password == "" || user.Password == undefined) {
-        if ($('#txtLoginPassword').after().prop('tagName') != 'SPAN') {
-            $('#txtLoginPassword').after($('<span  class="errorMsg">').text("* Password is required."));
-        }
+    else{
+        $('#errUsername').hide();
+        $('#txtLoginUserName').removeClass('txtBoxErr'); 
+
+    }      
+    if (user.Password == "" || user.Password == undefined){
+        $('#errPassword').show();   
+        $('#txtLoginPassword').addClass('txtBoxErr');     
         res = false;
-    }
-    else {
-        if ($('#txtLoginPassword').after().prop('tagName') == 'SPAN') {
-            $('#txtLoginPassword').after().remove();
-        }
+    } 
+    else{
+        $('#errPassword').hide();       
+        $('#txtLoginPassword').removeClass('txtBoxErr'); 
+
     }
     return res;
 } //this function validate text box in Login page
