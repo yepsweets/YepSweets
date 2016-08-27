@@ -1,0 +1,32 @@
+﻿body {
+}
+
+.login
+{
+    border-style:ridge;
+}
+
+.col{
+    font-family: 'Lucida Console';
+    font-size:large;
+}
+
+#wrap {
+   /*position:fixed;
+    top: 50%;
+    left: 50%;*/
+   /*margin: auto;
+   width: 50%;*/
+   position:absolute;
+    top: 50%;
+    left: 50%;
+    margin-top:-50px;
+    margin-left:-100px;
+    height: 332px;
+    width: 533px;
+}
+
+#newBranchDetails
+{
+    /*visibility:hidden;*/
+}
