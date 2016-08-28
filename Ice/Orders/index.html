@@ -36,7 +36,7 @@
             </div>
             <center>
                 Select Products:
-                <select id="ddlSelectProduct" >
+                <select id="ddlSelectProduct">
                     <option value="" disabled selected hidden></option>
                     <!-- Products are added here -->
                 </select>
@@ -51,7 +51,7 @@
         <div data-role="popup" id="puIceCream">
             <div>
                 <center>Select Number of Flavors:</center>
-                <select id="ddlNumFlavorsIC">
+                <select id="ddlNumFlavorsIC" class="reset">
                     <option value="" disabled selected hidden></option>
                     <!--Number of flavors is added here-->
                 </select>
@@ -60,7 +60,7 @@
                 <div id="1FlavorIC" class="hide">
                     <center>Select 1st Flavor:</center>
                     <!--<label onformchange="ddlFlavorIC1" value="Please Choose...">Please Choose...</label>-->
-                    <select id="ddlFlavorsIC1">
+                    <select id="ddlFlavorsIC1" class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
@@ -68,7 +68,7 @@
                 <div id="2FlavorIC" class="hide">
                     <!--<label onformchange="ddlFlavorIC2" value="Please Choose...">Please Choose...</label>-->
                     <center>Select 2nd Flavor:</center>
-                    <select id="ddlFlavorsIC2">
+                    <select id="ddlFlavorsIC2" class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
@@ -76,7 +76,7 @@
                 <div id="3FlavorIC" class="hide">
                     <center>Select 3rd Flavor:</center>
                     <!--<label onformchange="ddlFlavorIC3" value="Please Choose...">Please Choose...</label>-->
-                    <select id="ddlFlavorsIC3">
+                    <select id="ddlFlavorsIC3" class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
@@ -84,7 +84,7 @@
                 <div id="4FlavorIC" class="hide">
                     <center>Select 4th Flavor:</center>
                     <!--<label onformchange="ddlFlavorIC4" value="Please Choose...">Please Choose...</label>-->
-                    <select id="ddlFlavorsIC4">
+                    <select id="ddlFlavorsIC4" class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
@@ -92,13 +92,13 @@
             </div>
             <div>
                 <center>Select Add-Ons:</center>
-                <select id="ddlAddOnsIC">
+                <select id="ddlAddOnsIC" class="reset">
                     <option value="" disabled selected hidden></option>
                     <!--Add ons are added here-->
                 </select>
             </div>
             <div>
-                <center><a href="#" data-role="button">Add to Cart</a></center>
+                <center><a href="#" data-role="button" id="Add2CartIC">Add to Cart</a></center>
             </div>
         </div>
         <!-- End of Icecream popup-->
@@ -107,14 +107,14 @@
             <div id="ddlFlavorContainerMS">
                 <div>
                     <center>Select 1st Flavor:</center>
-                    <select id="ddlFlavorsMS1">
+                    <select id="ddlFlavorsMS1"; class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
                 </div>
                 <div>
                     <center>Select 2nd Flavor:</center>
-                    <select id="ddlFlavorsMS2">
+                    <select id="ddlFlavorsMS2"; class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
@@ -122,13 +122,13 @@
             </div>
             <div>
                 <center>Select Add-Ons:</center>
-                <select id="ddlAddOnsMS">
+                <select id="ddlAddOnsMS"; class="reset">
                     <option value="" disabled selected hidden></option>
                     <!--Add ons are added here-->
                 </select>
             </div>
             <div>
-                <center><a href="#" data-role="button">Add to Cart</a></center>
+                <center><a href="#" data-role="button" id="Add2CartMS">Add to Cart</a></center>
             </div>
         </div>
         <!-- End of Milkshake popup-->
@@ -136,7 +136,7 @@
         <div data-role="popup" id="puFrozenYogurt">
             <div>
                 <center>Select Size:</center>
-                <select id="ddlSizeFY" >
+                <select id="ddlSizeFY" class="reset" >
                     <option value="" disabled selected hidden></option>
                     <!--Sizes are added here-->
                 </select>
@@ -144,28 +144,28 @@
             <div id="ddlFlavorContainerFY">
                 <div>
                     <center>Select 1st Flavor:</center>
-                    <select id="ddlFlavorsFY1">
+                    <select id="ddlFlavorsFY1" class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
                 </div>
                 <div>
                     <center>Select 2nd Flavor:</center>
-                    <select id="ddlFlavorsFY2">
+                    <select id="ddlFlavorsFY2" class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
                 </div>
                 <div>
                     <center>Select 3rd Flavor:</center>
-                    <select id="ddlFlavorsFY3">
+                    <select id="ddlFlavorsFY3" class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
                 </div>
                 <div>
                     <center>Select 4th Flavor:</center>
-                    <select id="ddlFlavorsFY4">
+                    <select id="ddlFlavorsFY4" class="reset">
                         <option value="" disabled selected hidden></option>
                         <!--Flavors are added here-->
                     </select>
@@ -173,13 +173,13 @@
             </div>
             <div>
                 <center>Select Add-Ons:</center>
-                <select id="ddlAddOnsFY">
+                <select id="ddlAddOnsFY" class="reset">
                     <option value="" disabled selected hidden></option>
                     <!--Add ons are added here-->
                 </select>
             </div>
             <div>
-                <center><a href="#" data-role="button">Add to Cart</a></center>
+                <center><a href="#" data-role="button" id="Add2CartFY">Add to Cart</a></center>
             </div>
         </div>
         <!-- End of FrozenYogurt popup-->

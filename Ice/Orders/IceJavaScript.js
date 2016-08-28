@@ -85,6 +85,36 @@ $(document).on("pagecreate", "#index", function (event) {
                 }
             });
         }
+        //add FY order to db
+        $("#Add2CartFY").click(function () {
+            var size = $("#ddlSizeFY :selected").text();
+            var FlavorsArray = [];
+            for (var i = 1 ; i <= 4; i++) {
+                FlavorsArray[i - 1] = $("#ddlFlavorsFY" + i.toString() + " :selected").text();
+            }
+            var addOn = $("#ddlAddOnsFY :selected").text();
+            $.ajax({
+                url: WebServiceURL + "/submitOrder",
+                type: "POST",
+                data: {
+                    "UserEmail": _user.UserEmail,
+                    "FirstName": _user.FirstName,
+                    "LastName": _user.LastName,
+                    "PhoneNumber": _user.PhoneNumber,
+                    "CreditCardNumber": _user.CreditCardNumber,
+                    "DateTime": Date.now,
+                    "Address": _user.Address,
+                    "Body": "Product:FrozenYogurt,Size:"+size.toString()+",Flavors:" + FlavorsArray.toString() + ",Addons:" + addOn.toString()
+                },
+                error: function (err) {
+                    alert("error: " + JSON.stringify(err));
+                },
+                success: function (data) {
+                    alert("successful");
+                }
+
+            });
+        });
     });
 
     //Milkshake popup ddls
@@ -129,13 +159,41 @@ $(document).on("pagecreate", "#index", function (event) {
                 }
             });
         }
+        //add MS order to db
+        $("#Add2CartMS").click(function () {
+            var FlavorsArray = [];
+            for (var i = 1 ; i <= 2; i++) {
+                FlavorsArray[i - 1] = $("#ddlFlavorsMS" + i.toString() + " :selected").text();
+            }
+            var addOn = $("#ddlAddOnsMS :selected").text();
+            $.ajax({
+                url: WebServiceURL + "/submitOrder",
+                type: "POST",
+                data: {
+                    "UserEmail": _user.UserEmail,
+                    "FirstName": _user.FirstName,
+                    "LastName": _user.LastName,
+                    "PhoneNumber": _user.PhoneNumber,
+                    "CreditCardNumber": _user.CreditCardNumber,
+                    "DateTime": Date.now,
+                    "Address": _user.Address,
+                    "Body": "Product:Milkshake,Flavors:" + FlavorsArray.toString() + ",Addons:" + addOn.toString()
+                },
+                error: function (err) {
+                    alert("error: " + JSON.stringify(err));
+                },
+                success: function (data) {
+                    alert("successful");
+                }
+
+            });
+        });
     });
 
 
     //Ice cream popup ddls
     $("#puIceCream").on("popupafteropen", function (event) {
         var NumofFlavorsSelected;
-
         if ($("#ddlNumFlavorsIC option").length < 2) {
             WebServiceURL = "IceWS.asmx";
             $.support.cors = true;
@@ -181,7 +239,6 @@ $(document).on("pagecreate", "#index", function (event) {
             }
         });
         
-
         if ($("#ddlFlavorsIC1 option").length < 2) {
             WebServiceURL = "IceWS.asmx";
             $.support.cors = true;
@@ -223,11 +280,50 @@ $(document).on("pagecreate", "#index", function (event) {
                 }
             });
         }
+        //add IC order to db
+        $("#Add2CartIC").click(function () {
+            var FlavorsArray = [];
+            var numFlavors = $("#ddlNumFlavorsIC :selected").text();
+            for (var i = 1 ; i <= numFlavors; i++) {
+                 FlavorsArray[i-1] = $("#ddlFlavorsIC" + i.toString()+ " :selected").text();
+            }
+            var addOn = $("#ddlAddOnsIC :selected").text();
+            $.ajax({
+                url: WebServiceURL + "/submitOrder",
+                type: "POST",
+                data: {
+                    "UserEmail": _user.UserEmail,
+                    "FirstName": _user.FirstName,
+                    "LastName": _user.LastName,
+                    "PhoneNumber": _user.PhoneNumber,
+                    "CreditCardNumber": _user.CreditCardNumber,
+                    "DateTime": Date.now,
+                    "Address": _user.Address,
+                    "Body": "Product:IceCream,NumberofFlavors:"+numFlavors.toString()+",Flavors:"+FlavorsArray.toString()+",Addons:"+addOn.toString()
+                },
+                error: function (err) {
+                    alert("error: " + JSON.stringify(err));
+                },
+                success: function (data) {
+                    alert("successful");
+                }
+
+            });
+        });
     });
 
-   /* $("#puIceCream").on("popupafterclose", function (event) {
-        $('#ddlNumFlavorsIC').find('option:first').attr('selected', true);
-    });*/
+    $("#puIceCream").on("popupafterclose", function (event) {
+        $('#puIceCream select.reset').find('option:first').prop('selected', 'selected');
+        $('#puIceCream select.reset').selectmenu("refresh", true);
+    });
+    $("#puMilkshake").on("popupafterclose", function (event) {
+        $('#puMilkshake select.reset').find('option:first').prop('selected', 'selected');
+        $('#puMilkshake select.reset').selectmenu("refresh", true);
+    });
+    $("#puIceCream").on("popupafterclose", function (event) {
+        $('#puFrozenYogurt select.reset').find('option:first').prop('selected', 'selected');
+        $('#puFrozenYogurt select.reset').selectmenu("refresh", true);
+    });
 });
 
 
@@ -252,6 +348,8 @@ $(document).on("pageinit", "#index", function (event) {
         }
     });
  });
+
+
 
 
 

@@ -13,6 +13,8 @@
     display:none;
 }
 
+.reset{}
+
 #map0, #map1, #map2, #map3, #map4, #map5 {
     width: 200px;
     height: 200px;
