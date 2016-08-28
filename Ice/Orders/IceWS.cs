@@ -53,6 +53,27 @@ public class IceWS : System.Web.Services.WebService
     }
 
     [WebMethod]
+    public int submitOrder(string UserEmail, string FirstName, string LastName, string PhoneNumber, string CreditCardNumber, string DateTime, string Address, string Body)
+    {
+        int rows;
+        string sp = "sp_submitOrder";
+        SqlConnection con = new SqlConnection(conStr);
+        SqlCommand com = new SqlCommand(sp, con);
+        com.CommandType = CommandType.StoredProcedure;
+        com.Parameters.AddWithValue("@UserEmail", UserEmail);
+        com.Parameters.AddWithValue("@FirstName", FirstName);
+        com.Parameters.AddWithValue("@LastName", LastName);
+        com.Parameters.AddWithValue("@PhoneNumber", PhoneNumber);
+        com.Parameters.AddWithValue("@CreditCardNumber", CreditCardNumber);
+        com.Parameters.AddWithValue("@DateTime", DateTime);
+        com.Parameters.AddWithValue("@Address", Address);
+        com.Parameters.AddWithValue("@Body", Body);
+        com.Connection.Open();
+        rows = com.ExecuteNonQuery();
+        return rows;
+    }
+
+    [WebMethod]
     public List<Yep> GetProducts()
     {
         string sp = "sp_getProducts";
@@ -145,5 +166,6 @@ public class Yep
     public string colName { get; set; }
     public object value { get; set; }
     public Yep(string colName, object value) { this.colName = colName; this.value = value; }
-  
+    public Yep() { }
 }
+
