@@ -19,6 +19,7 @@ using System.Web.Services;
 public class IceWS : System.Web.Services.WebService
 {
     private static string conStr = ConfigurationManager.ConnectionStrings["IceDB"].ConnectionString;
+    private static JavaScriptSerializer ser = new JavaScriptSerializer();
     public IceWS()
     {
         //Uncomment the following line if using designed components 
@@ -35,14 +36,15 @@ public class IceWS : System.Web.Services.WebService
         //Context.Response.End(); 
         Context.ApplicationInstance.CompleteRequest();
         return null;
-    
+
     }
+
     public string GetSessionWithID(User user)
     {
         if (user.Email == null || user._token == null || "".Equals(user.Email) || "".Equals(user._token))
         {
-            terminateRequst(Context);
-            // return null; // 0 means no logical session
+            return false
+            // return user is not validate
         }
 
         string sp = "sp_getSessionWithID";
@@ -52,8 +54,16 @@ public class IceWS : System.Web.Services.WebService
         _params.Add("param2", "@sessionID");
         _params.Add("value2", user._token);
 
-        return ConvertTableToJsonList((getTable(sp, _params).Tables[0]));
+        try{
+            int.parse( (string)(ser.Deserialize( ConvertTableToJsonList((getTable(sp, _params).Tables[0])) , typeof(string)));
+            return true;
+            }
+        catch(Excaption e){
+                return false;
+        }
+
     }
+
     private string ValidateUser(User user)
     {
         if(user == null || ("email:"+"first:"+"last:"+"address:"+"password:"+"_token:").Equals(user.toString())){
@@ -78,8 +88,8 @@ public class IceWS : System.Web.Services.WebService
     [WebMethod]
     public string DoAjax(string func, string user)
     {
-        //user = "{\"Email\":\"pini@c.com,\",\"First\":\"Pini\",\"Last\":\"Ke\",\"Address\":\"Kadima\",\"Password\":\"\",\"City\":\"\",\"_token\":\"519\"}";
-        var _user = (User)(new JavaScriptSerializer()).Deserialize(user, typeof(User));
+        //user json format: "{\"Email\":\"pini@c.com,\",\"First\":\"Pini\",\"Last\":\"Ke\",\"Address\":\"Kadima\",\"Password\":\"\",\"City\":\"\",\"_token\":\"519\"}";
+        var _user = (User)(ser.Deserialize(user, typeof(User));
         if (!isAjaxRequestValidate(func,_user))
         {
             Context.Response.StatusDescription = "מזה החרא הזה?אגקס זה נוזל כלים בכלל!";
@@ -97,15 +107,14 @@ public class IceWS : System.Web.Services.WebService
         }
         if (func == "returnSession")
         {
-            if ("".Equals(user.Email) || "".Equals(user.Password))
+            if (!"".Equals(user.Email) && !"".Equals(user.Password))
             {
-                return false;
+                return true;
             }
         }
 
         return true;
     }
-    
     
     public string GetSession(User user)
     {
@@ -123,7 +132,7 @@ public class IceWS : System.Web.Services.WebService
         _params.Add("param1","@UserEmail");
         _params.Add("value1",user.Email.ToString());
         return ConvertTableToJsonList(getTable(sp,_params).Tables[0]);
-      }
+    }
 
     [WebMethod]
     public string GetYepBranches()
@@ -365,13 +374,13 @@ public class Method{
 
         switch(functionKey[this._func]){
             case 1:
-                return (new IceWS()).GetSessionWithID(this.user);
+            return (new IceWS()).GetSessionWithID(this.user);
             case 2:
-                    return (new IceWS()).GetSession(this.user);
+            return (new IceWS()).GetSession(this.user);
             case 3:
-                    return (new IceWS()).GetUserOrders(this.user);
+            return (new IceWS()).GetUserOrders(this.user);
             case 4:
-                    return (new IceWS()).GetYepBranches();
+            return (new IceWS()).GetYepBranches();
         }
         return "";
     }
