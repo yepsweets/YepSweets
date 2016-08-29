@@ -1,8 +1,8 @@
 /// <reference path="yepJs.js" />
 ajaxLoaderManager = { showLoadDiv: showLoadingDiv, removeLoadDiv: removeLoadingDiv };
-_emptyUser = { Email: "", First: "", Last: "", Address: "", Password: "", _token: "" };
+const _emptyUser = JSON.stringify({ Email: "", First: "", Last: "", Address: "", Password: "", _token: "" });
 if (Cookies.getJSON("_user") == undefined || Cookies.getJSON("_user") == "null") {
-    _user = _emptyUser;
+    _user = JSON.parse(_emptyUser);
     Cookies.set("_user", _user);
 } else {
     _user = Cookies.getJSON("_user");
@@ -25,7 +25,7 @@ function validateUser(user) {
 }
 
 $(document).on("pagecreate", "#branches", function () {
-    doAjax("GetYepBranches", "", function (data) {
+    doAjax("GetYepBranches", { func: "GetYepBranches", user: _user }, function (data) {
         var list = JSON.parse(data.d);
         //init map
         var long = list.Table[0].Longitude;
@@ -92,11 +92,11 @@ $(document).one('pagebeforecreate', function () {
 
 $(document).on("pageshow", "#index", function (event) {
     $('#index' + ' .menuLink').attr('href', '#menu'); // bind menu button
-    setMenu("index",_user); // init menu
+    setMenu("index", _user); // init menu
 }); //init index page
 $(document).on("pageshow", "#branches", function (event) {
     $('#Branches' + ' .menuLink').attr('href', '#menu');// bind menu button
-    setMenu('branches',_user); // init menu
+    setMenu('branches', _user); // init menu
 }); // init branches page
 $(document).on("pageshow", "#myorders", function (event) {
     if (!validateUser(_user)) {
@@ -150,35 +150,42 @@ function buildPopup() {
 
     return string;
 } //this function return popup as string
+
 function istAjaxValidateRequest(func, user) {
     var res = false;
-    if (func == null || "" == func || "" == user.Email) {
-        res = false;
+    if (func == null || "" == func) {
+        return false;
     }
-    else {
-        if (func == "returnSession" && user.Email != "" && user.Password != "") {
-            res = true;
-        }
-        else {
-            if (validateUser(user)) {
-                res = true;
-            }
-        }
+    if (func == "GetYepBranches") {
+        return true;
     }
-    return res;
+    if (func == "returnSession" && user.Email != "" && user.Password != "") {
+        return true;
+    }
+    if (validateUser(user)) {
+        return true;
+    }
+
+    return false;
 }
+
 function doAjax(webService, _data, _function, _functionError) {
-    var WebServiceURL = "IceWS.asmx";//"http://proj.ruppin.ac.il/cegroup3/prod/IceWS.asmx";
-    $.support.cors = true;
-    $.ajax({
-        url: WebServiceURL + '/' + webService,
-        dataType: "json",
-        type: "POST",
-        data: _data,
-        contentType: "application/json; charset=utf-8",
-        error: _functionError,
-        success: _function
-    });
+    if (istAjaxValidateRequest(_data.func, _data.user)) {
+        _data.user = JSON.stringify(_data.user);
+        _data = JSON.stringify(_data);
+        var WebServiceURL = "IceWS.asmx";//"http://proj.ruppin.ac.il/cegroup3/prod/IceWS.asmx";//
+        $.support.cors = true;
+        $.ajax({
+            url: WebServiceURL + '/' + webService,
+            dataType: "json",
+            type: "POST",
+            data: _data,
+            contentType: "application/json; charset=utf-8",
+            error: _functionError,
+            beforeSend: ajaxLoaderManager.showLoadDiv($('.ui-page-active')),
+            success: function (data) { ajaxLoaderManager.removeLoadDiv($('.ui-page-active')); _function(data); }
+        });
+    }
 
 }
 
@@ -196,17 +203,20 @@ function setMenu(pageId, _user) {
         $('#conStatus').html($("<a>").attr({ 'data-rel': 'popup', href: '#signIn', 'data-role': "button" }).addClass("ui-btn btnSignIn").text("Log In/Sign In").buttonMarkup());
     }
     $("#menu li").each(function () {
-        var link = $(this).find("a");
-        var liId = $(this).attr('id');
+        var currentLi = $(this);
+        var link = currentLi.find("a");
+        var liId = currentLi.attr('id');
         if (liId != undefined && liId != "") {
             if (liId.toLowerCase() == pageId) {
-                $(this).attr('data-role', 'list-divider');
+                currentLi.attr('data-role', 'list-divider');
                 link.attr('class', 'ui-btn');
             }
             else {
+                // if (!validateUser(_user) && !currentLi.hasClass('roleLi')) {
                 link.attr('href', '#' + liId.toLowerCase());
                 $(this).removeAttr("data-role").removeAttr('class', '');
                 link.attr('class', 'ui-btn ui-btn-icon-right ui-icon-carat-r');
+                // }
             }
         }
     });
@@ -219,7 +229,7 @@ function sendLogin() {
     _user.Email = $('#txtLoginUserName').val();
     _user.Password = $('#txtLoginPassword').val();
     if (validateLogIn(_user)) {
-        doAjax("DoAjax", JSON.stringify({ "func": "returnSession", "user": JSON.stringify(_user) }), setSession, defualtErr);
+        doAjax("DoAjax", { "func": "returnSession", "user": _user }, setSession, defualtErr);
     }
 } //event when Login btn tapped.
 
@@ -236,17 +246,19 @@ function setSession(data) {
     $.mobile.changePage('#index', { reloadPage: true });
 
 } //this function return at login = success.
+
 function logOutRemoveDisplay() {
     $('#myOrdersListCollapsible').html(""); //init myorders page
-    var removeList = $("#menuList .roleLi"); //delete all user role Li
+    var removeList = $("#menuList [hasrole=roleLi]"); //delete all user role Li
     for (var i = 0 ; i < removeList.length ; i++) {
-        removeList[i].hide();
+        $(removeList[i]).remove();
     }
 }
+
 function logOnFillDisplay() {
     //TODO: open "CLOSED" section in menu, Fill user orders
     if ($('#menuList #MYORDERS').length == 0) {
-        $("#menuList").append($('<li id="MYORDERS">').attr({class: 'roleLi'}).html($("<a>").attr({ href: "#myorders" }).addClass("ui-btn ui-btn-icon-right ui-icon-carat-r").text("My Orders")));
+        $("#menuList").append($('<li id="MYORDERS">').attr({ 'hasRole': 'roleLi' }).html($("<a>").attr({ href: "#myorders" }).addClass("ui-btn ui-btn-icon-right ui-icon-carat-r").text("My Orders")));
     }
     //fillUserOrders(_userID,_token); ? is this belong here?
     //doAjax(getUserOrders)<- TODO: display orders section 
@@ -256,24 +268,24 @@ function fillUserOrders(user) {
     //doAjax get orders and fill the data.
     var _func = "getUserOrders";
     if ($('#myOrdersListCollapsible').html().trim() == "") {
-        if (istAjaxValidateRequest(_func, user)) {
-            doAjax('DoAjax', JSON.stringify({ func: _func, user: JSON.stringify(user) }),
-                function (data) {
-                    data = JSON.parse(data.d);
-                    data = data.Table;
-                    var $ordersCollapsible = $('#myOrdersListCollapsible');
-                    $ordersCollapsible.html("");
-                    for (var i = 0 ; i < data.length ; i++) {
-                        var pText = 'Id: ' + data[i].Id + "<br/>" + "First Name: " + data[i].FirstName + ", Last Name:" + data[i].LastName + "<br/>" + "Telephone: " + data[i].PhoneNumber + ", Date & Time: " + data[i].DateTime + "<br/>" + data[i].Address;
-                        var hText = "Order Id. " + $('<span class="colored-text">').text(data[i].Id).prop('outerHTML') + $('<span class="data-spacer">').prop('outerHTML') + "Date: " + $('<span class="colored-text">').text(data[i].DateTime).prop('outerHTML');
-                        $ordersCollapsible.append($("<div>").attr({ 'data-role': 'collapsible' }).html($("<h2>").html(hText)).append($("<p>").html(pText)));
-                    }
-                    $("#myOrdersListCollapsible").collapsibleset("refresh"); // refresh collapsible
-                }, defualtErr);
-        }
-        else {
-            terminateSession(user);
-        }
+        doAjax('DoAjax', { func: _func, user: user },
+            function (data) {
+                data = JSON.parse(data.d);
+                data = data.Table;
+                var $ordersCollapsible = $('#myOrdersListCollapsible');
+                $ordersCollapsible.html("");
+                for (var i = 0 ; i < data.length ; i++) {
+                    //var pText = 'Id: ' + data[i].Id + "<br/>" + "First Name: " + data[i].FirstName + ", Last Name:" + data[i].LastName + "<br/>" + "Telephone: " + data[i].PhoneNumber + ", Date & Time: " + data[i].DateTime + "<br/>" + data[i].Address;
+                    var temp = $('<div>').attr({ class: 'ui-grid-a' });
+
+                    $.each(data[i], function (i, n) {
+                        temp.append($('<div>').attr({ class: 'ui-block-a' }).text(i + ':')).append($('<div>').attr('class', 'ui-block-b').text(n));
+                    });
+                    var hText = "Order Id. " + $('<span class="colored-text">').text(data[i].Id).prop('outerHTML') + $('<span class="data-spacer">').prop('outerHTML') + "Date: " + $('<span class="colored-text">').text(data[i].DateTime).prop('outerHTML');
+                    $ordersCollapsible.append($("<div>").attr({ 'data-role': 'collapsible' }).html($("<h2>").html(hText)).append($("<div>").attr({ class: 'ui-grid-a' }).html(temp.prop('outerHTML'))));
+                }
+                $("#myOrdersListCollapsible").collapsibleset("refresh"); // refresh collapsible
+            }, defualtErr);
     }
 
 } //this function manage ths myorders page data.
@@ -313,13 +325,6 @@ function buildMenu() {
 	$('<li>').attr({ id: 'INDEX' }).html($('<a>').text('Home')).prop('outerHTML')).append(
 	$('<li>').attr({ id: 'BRANCHES' }).html($('<a>').text('Branches')).prop('outerHTML'))).prop('outerHTML');
     return string;
-    //string += '<div data-role="panel" id="menu" data-position="right" data-display="push" data-theme="a">' +
-    //'<ul data-role="listview" id="menuList" >' +
-    //'<li><div id="statusBar"></div></li>' +
-    //'<li id="INDEX"><a>Home</a></li>' +
-    //'<li id="BRANCHES"><a>Branches</a></li>' +
-    //'</ul>' +
-    //'</div>';
 }//this function return a menu as string
 
 function sliderStart(pageIdWithHash) {
@@ -338,15 +343,17 @@ function sliderStart(pageIdWithHash) {
 function _LogOut() {
     //restart app
     //Cookies.remove('_user');
-    _user = _emptyUser;
+    _user = JSON.parse(_emptyUser);
     Cookies.remove("_user");
     logOutRemoveDisplay();
     $.mobile.changePage('#index', { reloadPage: true });
 } // this return app to wait login state
+
 function showLoadingDiv(element) {
-    $('#' + element).append($("<div>").attr({ id: 'fadeLoadingDiv', class: 'fadeLoadingDiv' })).append($("<div>").attr({ id: 'modelLoadingDiv', class: 'modelLoadingDiv' }).append($('<img>').attr({ class: 'loadingDivImag', src: '/images/loading.gif' })));
+    element.append($("<div>").attr({ id: 'fadeLoadingDiv', class: 'fadeLoadingDiv' })).append($("<div>").attr({ id: 'modelLoadingDiv', class: 'modelLoadingDiv' }).append($('<img>').attr({ src: 'images/loading.gif' })));
 }
+
 function removeLoadingDiv(element) {
-    $('#' + element).find('#modelLoadingDiv').remove();
-    $('#' + element).find('#fadeLoadingDiv').remove();
+    element.find('#modelLoadingDiv').remove();
+    element.find('#fadeLoadingDiv').remove();
 }
