@@ -1,6 +1,6 @@
 /// <reference path="yepJs.js" />
 ajaxLoaderManager = { showLoadDiv: showLoadingDiv, removeLoadDiv: removeLoadingDiv };
-const _emptyUser = JSON.stringify({ Email: "", First: "", Last: "", Address: "", Password: "", _token: "" });
+const _emptyUser = JSON.stringify({ Email: "", First: "", Last: "", Address: "",Password:"",City:"", _token: "" });
 if (Cookies.getJSON("_user") == undefined || Cookies.getJSON("_user") == "null") {
     _user = JSON.parse(_emptyUser);
     Cookies.set("_user", _user);
@@ -94,10 +94,12 @@ $(document).on("pageshow", "#index", function (event) {
     $('#index' + ' .menuLink').attr('href', '#menu'); // bind menu button
     setMenu("index", _user); // init menu
 }); //init index page
+
 $(document).on("pageshow", "#branches", function (event) {
     $('#Branches' + ' .menuLink').attr('href', '#menu');// bind menu button
     setMenu('branches', _user); // init menu
 }); // init branches page
+
 $(document).on("pageshow", "#myorders", function (event) {
     if (!validateUser(_user)) {
         $.mobile.changePage('#index');
@@ -236,6 +238,7 @@ function sendLogin() {
 function setSession(data) {
 
     data = JSON.parse(data.d);
+    _user.Password = "";
     _user._token = data.Table[0].SessionID;
     _user.First = data.Table[0].FirstName;
     _user.Last = data.Table[0].LastName;
