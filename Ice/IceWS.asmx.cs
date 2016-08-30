@@ -39,31 +39,44 @@ public class IceWS : System.Web.Services.WebService
 
     }
 
-    public string GetSessionWithID(User user)
+    public Boolean ValidateUserToken(User user)
     {
         if (user.Email == null || user._token == null || "".Equals(user.Email) || "".Equals(user._token))
         {
-            return false
+            return false;
             // return user is not validate
         }
 
         string sp = "sp_getSessionWithID";
         var _params = new Dictionary<string, string>();
-        _params.Add("param1", "@userAccount");
+        _params.Add("param1", "@UserEmail");
         _params.Add("value1", user.Email);
         _params.Add("param2", "@sessionID");
         _params.Add("value2", user._token);
-
-        try{
-            int.parse( (string)(ser.Deserialize( ConvertTableToJsonList((getTable(sp, _params).Tables[0])) , typeof(string)));
-            return true;
-            }
-        catch(Excaption e){
-                return false;
+        if ("0".Equals(getTable(sp, _params).Tables[0].Rows[0][0].ToString()))
+        {
+            return false;
         }
-
+        var _minutes = Session["TTL"].ToString() ?? "";
+        if (int.Parse(_minutes.ToString()) < 10)
+        {
+            _params = new Dictionary<string, string>();
+            _params.Add("param1", "@Minutes");
+            _params.Add("value1", "10");
+            _params.Add("param2", "@sessionId");
+            _params.Add("value2", user._token.ToString());
+            try
+            {
+                Session["TTL"] = int.Parse(getTable("sp_AddSessionTTLMinutes", _params).Tables[0].Rows[0][0].ToString());
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+           
+        }
+        return true;
     }
-
     private string ValidateUser(User user)
     {
         if(user == null || ("email:"+"first:"+"last:"+"address:"+"password:"+"_token:").Equals(user.toString())){
@@ -85,11 +98,16 @@ public class IceWS : System.Web.Services.WebService
         return res;
     }
 
-    [WebMethod]
+
+    [WebMethod(EnableSession = true)]
     public string DoAjax(string func, string user)
     {
+        if (Session["TTL"] == null)
+        {
+            Session["TTL"] = 0;
+        }
         //user json format: "{\"Email\":\"pini@c.com,\",\"First\":\"Pini\",\"Last\":\"Ke\",\"Address\":\"Kadima\",\"Password\":\"\",\"City\":\"\",\"_token\":\"519\"}";
-        var _user = (User)(ser.Deserialize(user, typeof(User));
+        var _user = (User)(ser.Deserialize(user, typeof(User)));
         if (!isAjaxRequestValidate(func,_user))
         {
             Context.Response.StatusDescription = "מזה החרא הזה?אגקס זה נוזל כלים בכלל!";
@@ -113,7 +131,7 @@ public class IceWS : System.Web.Services.WebService
             }
         }
 
-        return true;
+        return ValidateUserToken(user);
     }
     
     public string GetSession(User user)
@@ -373,8 +391,8 @@ public class Method{
     public string Invok(){
 
         switch(functionKey[this._func]){
-            case 1:
-            return (new IceWS()).GetSessionWithID(this.user);
+            //case 1:
+            //return (new IceWS()).ValidateUserToken(this.user).ToString();
             case 2:
             return (new IceWS()).GetSession(this.user);
             case 3:
