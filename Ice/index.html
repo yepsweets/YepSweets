@@ -1,24 +1,26 @@
-<!DOCTYPE html> 
+﻿<!DOCTYPE html> 
 
 <html>
 <head>
 
 	<meta charset="utf-8">
-	<!-- <meta name="viewport" content="width=device-width, initial-scale=1">  -->
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	
+    <title>YEP! - Ice Cream and Sweets</title> 
 
-	<title>YEP! - Ice Cream and Sweets</title> 
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="style/yepStyle.css" />
 
-	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"/>
- 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
  	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+
 	<script type="text/javascript" src="js/js.cookie.js"></script>
 	<script src="js/yepJs.js"></script>
-	<link rel="stylesheet" href="style/yepStyle.css" />
     <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
-
 </head>
-<body>
+<body>    
 	<div data-role="page" id="index">
 	 	<div data-role="panel" class="panel" id="" display="push" data-position="right">
 	 	
@@ -48,8 +50,9 @@
 				<div class="body-post">
 					<p class="arial">You are in the right place! Here you can buy the sweetest things ever!</p>
 					<p class="time">You are in the right place! Here you can buy the sweetest things ever!</p>
-					<p class="else">You can also go to <a href="#sec">Page 2</a></p>
-				</div>
+					<p class="else">You can also go to <input id="btnTake" type="button" value="camera" /></p>
+                    <p style="background-color:yellow;height:25px;width:25px;" class="" id="progressBar"></p>
+                </div>
 			</div>
 
 			<div class="seperator"></div>
@@ -74,52 +77,143 @@
 		</div>
 	</div><!-- index page -->
 
-<div data-role="page" id="branches">
 
-		<div data-role="header" data-position="fixed" class="header">
-			<div class="ui-grid-a">
-				<div class="ui-block-a"><img src="images/YepMobileLogo.png"></div>
-				<div class="ui-block-b"><a class="menuLink" href="#menu"><img src="images/MenuIcon.png"></a></div>
-			</div><!--Logo Section-->
-		</div>
+    <div data-role="page" id="branches">
 
-		<div data-role="content">
+        <div data-role="header" data-position="fixed" class="header">
+            <div class="ui-grid-a">
+                <div class="ui-block-a"><img src="images/YepMobileLogo.png"></div>
+                <div class="ui-block-b"><a class="menuLink" href="#menu"><img src="images/MenuIcon.png"></a></div>
+            </div><!--Logo Section-->
+        </div>
 
-			<div class="mySlide">
-				<div><img src="images/slider/IceCreamStick.jpg" alt="IceCreamStick.jpg"></div>
-				<div><img src="images/slider/Berries_Ice_Cream.jpg" alt="Berries_Ice_Cream.jpg"></div>
-				<div><img src="images/slider/Dessert_Ice_Cream.jpg" alt="Dessert_Ice_Cream.jpg"></div>
-				<div><img src="images/slider/StrawberryVanilla.jpg" alt="StrawberryVanilla.jpg"></div>
-			</div><!-- Slide Show -->
+        <div data-role="content">
 
-			<div class="postDiv">
-				<div class="ui-grid-a">
-  					<div class="ui-block-a"><h2>Branches!</h2></div>
- 					<div class="ui-block-b"><a class="featureIcon" href="#"><img src="images/YepMobileFacebookIcon.png"></a><a class="featureIcon" href="#"><img src="images/YepMobileTwitterIcon.png"></a></div>
-				</div>
-				<div class="body-post">
-				<!--content goes here..-->
-					<div class="ui-grid-solo">
-						<div class="ui-block-a">
-							<div class="ui-field-contain">
- 								 <label for="select-choice-1" class="select">Select Branche:</label>
-								 <select name="select-branches" id="select-branches">
-								 </select>
-							</div>
-						</div>
-					</div>
-					<div id="map-canvas">
-                    	<!-- map loads here... -->
-                	</div>
-                	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmh_COeRD0C4hHnT_Tt0IUwS-wXv-Gdmg&callback=initMap"></script>
-                	<div class="seperator"></div>
-				</div>
-			</div>
-	
-		</div>
-	</div><!-- index page -->
-	<div data-role="page" id="try">
-	</div>
+            <div class="mySlide">
+                <div><img src="images/slider/IceCreamStick.jpg" alt="IceCreamStick.jpg"></div>
+                <div><img src="images/slider/Berries_Ice_Cream.jpg" alt="Berries_Ice_Cream.jpg"></div>
+                <div><img src="images/slider/Dessert_Ice_Cream.jpg" alt="Dessert_Ice_Cream.jpg"></div>
+                <div><img src="images/slider/StrawberryVanilla.jpg" alt="StrawberryVanilla.jpg"></div>
+            </div><!-- Slide Show -->
+
+            <div class="postDiv">
+                <div class="ui-grid-a">
+                    <div class="ui-block-a"><h2>Branches!</h2></div>
+                    <div class="ui-block-b"><a class="featureIcon" href="#"><img src="images/YepMobileFacebookIcon.png"></a><a class="featureIcon" href="#"><img src="images/YepMobileTwitterIcon.png"></a></div>
+                </div>
+                <div class="body-post">
+                    <!--content goes here..-->
+                    <div class="ui-grid-solo">
+                        <div class="ui-block-a">
+                            <div class="ui-field-contain">
+                                <label for="select-choice   -1" class="select">Select Branche:</label>
+                                <select name="select-branches" id="select-branches"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui-grid-solo">
+                        <div class="ui-block-a">
+                            <div class="postDiv">
+                                <div class="ui-grid-solo">
+                                    <div class="ui-block-a"><h2 id="txtSelectedBranche"></h2></div>
+                                </div>
+                                <div class="body-post">
+                                    <div class="ui-grid-a">
+                                        <div class="ui-block-a">
+                                            <div class="ui-bar"><h3>Branch Name:</h3></div>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <div class="ui-bar"><h3 class="color-text-gray" id="txtSelectedBranchName"></h3></div>
+                                        </div>
+                                        <div class="ui-block-a">
+                                            <div class="ui-bar"><h3>Address: </h3></div>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <div class="ui-bar"><h3 class="color-text-gray" id="txtSelectedAddress"></h3></div>
+                                        </div>
+                                        <div class="ui-block-a">
+                                            <div class="ui-bar"><h3>Kosher: </h3></div>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <div class="ui-bar" id="iconSelectedKosher"></div>
+                                        </div>
+                                    </div>
+                                    <div class="seperatorMini"></div>
+                                    <div class="ui-grid-b">
+                                        <div class="ui-block-a">
+                                            <div class="ui-bar"><h3>Opening Hours: </h3></div>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <div class="ui-bar"><h4 id="txtMidWeek" class="no-margin"></h4><br /><h5 class="margin-5 colored-text" id="txtMidWeekOpenHours"></h5></div>
+                                        </div>
+                                        <div class="ui-block-c">
+                                            <div class="ui-bar"><h4 id="txtWeekend" class="no-margin"></h4><br /><h5 class="margin-5 colored-text" id="txtWeekendOpenHours"></h5></div>
+                                        </div>
+                                        <div class="ui-block-a">
+                                            <div class="ui-bar"><h3>Additionals: </h3></div>
+                                        </div>
+                                        <div class="ui-block-b">
+                                            <div class="ui-bar"><h4 class="no-margin color-text-gray">Manager</h4><br /><h5 class="margin-5 colored-text" id="txtManager"></h5></div>
+                                        </div>
+                                        <div class="ui-block-c">
+                                            <div class="ui-bar"><h4 class="no-margin color-text-gray">Telephone</h4><br /><h5 class="margin-5 colored-text" id="txtTelephone"></h5></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="seperatorMini"></div>
+
+                                    <div id="map-canvas"><!-- map loads here... --></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmh_COeRD0C4hHnT_Tt0IUwS-wXv-Gdmg"></script>
+                    <div class="seperator"></div>
+                </div>
+            </div>
+
+        </div>
+    </div><!-- branches page -->
+
+    <div data-role="page" id="myorders">
+
+        <div data-role="header" data-position="fixed" class="header">
+            <div class="ui-grid-a">
+                <div class="ui-block-a"><img src="images/YepMobileLogo.png"></div>
+                <div class="ui-block-b"><a class="menuLink" href="#menu"><img src="images/MenuIcon.png"></a></div>
+            </div><!--Logo Section-->
+        </div>
+
+        <div data-role="content">
+
+            <div class="mySlide">
+                <div><img src="images/slider/IceCreamStick.jpg" alt="IceCreamStick.jpg"></div>
+                <div><img src="images/slider/Berries_Ice_Cream.jpg" alt="Berries_Ice_Cream.jpg"></div>
+                <div><img src="images/slider/Dessert_Ice_Cream.jpg" alt="Dessert_Ice_Cream.jpg"></div>
+                <div><img src="images/slider/StrawberryVanilla.jpg" alt="StrawberryVanilla.jpg"></div>
+            </div><!-- Slide Show -->
+
+            <div class="postDiv">
+                <div class="ui-grid-a">
+                    <div class="ui-block-a"><h2>My Orders!</h2></div>
+                    <div class="ui-block-b"><a class="featureIcon" href="#"><img src="images/YepMobileFacebookIcon.png"></a><a class="featureIcon" href="#"><img src="images/YepMobileTwitterIcon.png"></a></div>
+                </div>
+                <div class="body-post">
+                    <div class="ui-grid-solo">
+                        <div class="ui-block-a" id="myOrdersContent">
+                            <!--content goes here..-->
+                            <div id="myOrdersListCollapsible" data-role="collapsible-set" data-inset="false" class="ui-collapsible-set" data-corners="false">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="seperator"></div>
+        </div>
+    </div><!-- index page -->
+
 
 </body>
 </html>

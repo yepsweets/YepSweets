@@ -27,6 +27,22 @@ public class IceWS : System.Web.Services.WebService
     }
 
 
+    [WebMethod]
+    public string UploadFile()
+    {
+        string lreturn = "success";
+        try
+        {
+            HttpPostedFile file = HttpContext.Current.Request.Files["file"];
+            string saveFile = Context.Server.MapPath("~/") +"postedFiles\\"+ file.FileName;
+            file.SaveAs(saveFile);
+        }
+        catch (Exception ex)
+        {
+            lreturn = "fail. " + ex.Message;
+        }
+        return lreturn;
+    }  
 
     private string terminateRequst(HttpContext Context){
         Context.Response.Status = "403 Forbidden";
@@ -34,6 +50,7 @@ public class IceWS : System.Web.Services.WebService
         Context.Response.StatusCode = 403;
         //the next line can result in a ThreadAbortException
         //Context.Response.End(); 
+        Context.Response.Write("error:899");
         Context.ApplicationInstance.CompleteRequest();
         return null;
 
@@ -77,27 +94,37 @@ public class IceWS : System.Web.Services.WebService
         }
         return true;
     }
-    private string ValidateUser(User user)
+ 
+    private Boolean ValidateUser(User user)
     {
-        if(user == null || ("email:"+"first:"+"last:"+"address:"+"password:"+"_token:").Equals(user.toString())){
-            return null;
+        if (user == null || "".Equals(user.Email) || "".Equals(user.Password))
+        {
+            return false;
         }
-        string sp = "sp_doValidateUser", res = "0";
+        string sp = "sp_doValidateUser";
         Dictionary<string,string> _params = new Dictionary<string, string>();
         _params.Add("param1", "@UserEmail");
         _params.Add("value1", user.Email);
 
         _params.Add("param2", "@UserPassword");
         _params.Add("value2", user.Password);
-
-        res = ConvertTableToJsonList( getTable(sp, _params).Tables[0] );
-        if("0".Equals(res))
-        { 
-            res = "0";
+        try
+        {
+            var res = int.Parse(getTable(sp, _params).Tables[0].Rows[0][0].ToString());
+            if ("0".Equals(res))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
-        return res;
+        catch (Exception e)
+        {
+            return false;
+        }
     }
-
 
     [WebMethod(EnableSession = true)]
     public string DoAjax(string func, string user)
@@ -136,11 +163,7 @@ public class IceWS : System.Web.Services.WebService
     
     public string GetSession(User user)
     {
-        if (user.Email == null || user.Password == null || "".Equals(user.Email) || "".Equals(user.Password))
-        {
-            return terminateRequst(Context);        
-        } // 0 means no logical session
-        if ("0".Equals(this.ValidateUser(user)))
+        if (!ValidateUser(user))
         {
             return terminateRequst(Context);
         }

@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <link href="style/font-awesome-4.6.3/css/font-awesome.css" rel="stylesheet" />
+    <script src="js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript">
+
+    //var files = $("#YOURUPLOADCTRLID").get(0).files;
+
+    // Add the uploaded image content to the form data collection
+    //if (files.length > 0) {
+    //    data.append("UploadedFile", files[0]);
+    //}
+        $(document).ready(function () {
+            $('#btn').click(upload);
+        }
+            );
+        function upload() {
+           var data = new FormData(),
+           file = $("#fileUpload")[0].files[0];
+
+            //data.append("name", file.name);
+            //data.append("size", file.size);
+            //data.append("type", file.type);
+            data.append("file", file);
+            //data.append("UploadedFile", path);
+
+            //Make Ajax request with the contentType = false, and procesDate = false
+            $.ajax({
+                type: 'POST',
+                url: 'IceWS.asmx/UploadFile',
+                data: data,
+                async: false,
+                success: function (data) {
+                    alert(data)
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+
+        }
+
+    $('#mybtn').click();
+
+
+    </script>
+
+
+
+</head>
+<body>
+    <i class="fa fa-camera-retro fa-2x myIcon" title="Edit"></i>
+    <input id="fileUpload" type="file" />
+    <input id="btn" type="button" value="submit"/>
+
+</body>
+</html>
+
+
+
+
