@@ -3,7 +3,7 @@
 <head>
     <title></title>
     <link href="style/font-awesome-4.6.3/css/font-awesome.css" rel="stylesheet" />
-    <script src="js/jquery-1.6.4.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script type="text/javascript">
 
     //var files = $("#YOURUPLOADCTRLID").get(0).files;
@@ -20,9 +20,9 @@
            var data = new FormData(),
            file = $("#fileUpload")[0].files[0];
 
-            //data.append("name", file.name);
-            //data.append("size", file.size);
-            //data.append("type", file.type);
+            data.append("name", file.name);
+            data.append("size", file.size);
+            data.append("type", file.type);
             data.append("file", file);
             //data.append("UploadedFile", path);
 
@@ -33,7 +33,10 @@
                 data: data,
                 async: false,
                 success: function (data) {
-                    alert(data)
+                    alert((data.d)+' success');
+                },
+                error: function (e,r,rr) {
+                    alert('  error');
                 },
                 cache: false,
                 contentType: false,

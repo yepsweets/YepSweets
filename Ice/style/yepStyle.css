@@ -9,6 +9,15 @@ PostDiv background color : light gray - #eeeeee
 
 */
 
+::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color: pink;
+}
+::-moz-placeholder { /* Firefox 19+ */
+  color: pink;
+}
+:-ms-input-placeholder { /* IE 10+ */
+  color: pink;
+}
 
 *{
 	font-family: "Roboto", sans-serif !important;
@@ -125,8 +134,9 @@ h2{
     color:white;
 }
 #signIn{
+    margin: 0 20px;
     padding: 15px;
-    color:#34005C;
+    color: #34005C;
     background-color: #EEEEEE;
 }
 .Mybtn{
@@ -134,6 +144,7 @@ h2{
     background: #FF91D2;
     border-radius: 15px;
     margin: 5px;
+    color:#34005C;
 }
 #menu{
 	background: #34005C;
@@ -259,6 +270,27 @@ h3{
 	align-items: center;
 	justify-content: center;
 }
+#formSignUp{
+    display : none;
+}
+    
+#formSignUp label{
+    border-bottom: 1px gray dashed;
+    font-size: 1.1em;
+    margin: 5px;
+}
+#formSignUp input,#formSignUp textarea{
+    
+    background-color: #BD9FD4;
+    color: black;
+    text-shadow: 0px 0px;
+    box-shadow: inset 0 0 10px #eeeeee;
+}
+#formSignUp label::after{
+    content: '*';
+    color:red;
+}
+
 
 
 
