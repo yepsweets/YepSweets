@@ -22,11 +22,16 @@ function validateUser(user) {
     }
     return false;
 }
+
 function onDeviceReady() {
     alert('deviceReady');
     $('#btnTake').on('tap', takePhoto);
     function takePhoto() {
-        navigator.camera.getPicture(cameraSuccess, cameraError, { sourceType: Camera.PictureSourceType.PHOTOLIBRARY });
+        navigator.camera.getPicture(cameraSuccess, cameraError, {
+            quality: 50,
+            destinationType: navigator.camera.DestinationType.FILE_URI,
+            sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY
+        });
         function cameraSuccess(imageData) {
             alert(imageData);
             uploadPic(imageData);
@@ -99,8 +104,12 @@ $(document).one('pagebeforecreate', function () {
     var popup = buildPopup();
     $.mobile.pageContainer.prepend(panel);
     $.mobile.pageContainer.prepend(popup);
-    $("#signIn").popup().enhanceWithin();
-    $("#signIn #btnLogin").on("tap", sendLogin);
+    $('#signIn').popup().enhanceWithin();
+    $('#signIn #btnLogin').on("tap", sendLogin);
+    $('#btnSignup').on("tap", function () {
+        $('#formSignUp').show();
+    });
+    $('#btnSubmitSignUp').on('tap',sendSignup);
     $("#menu").panel().enhanceWithin();
     sliderStart('#myorders');// init slider
     sliderStart('#index');// init slider
@@ -140,10 +149,10 @@ function buildPopup() {
       $('<div>').attr({ class: 'myPop' })
       .html($('<h3>').text('Please sign in'))
       .append(
-        $('<label>').attr({ for: "txtLoginUserName", class: "ui-hidden-accessible" }).text('User Name: ')
+        $('<label>').attr({ for: "txtLoginUserName", class: "ui-hidden-accessible" }).text('Email: ')
         )
       .append(
-        $('<div>').append($('<input>').attr({ type: "text", name: "txtLoginUserName", id: "txtLoginUserName", placeholder: 'username', 'data-theme': "a" })).append($('<p>').text('* User Name is required.').attr({ id: 'errUsername', class: "errLogIn" }).hide())
+        $('<div>').append($('<input>').attr({ type: "text", name: "txtLoginUserName", id: "txtLoginUserName", placeholder: 'username', 'data-theme': "a" })).append($('<p>').text('* Email is required.').attr({ id: 'errUsername', class: "errLogIn" }).hide())
         )
       .append(
         $('<label>').attr({ for: "txtUserPassword", class: "ui-hidden-accessible" }).text('Password: ')
@@ -153,8 +162,8 @@ function buildPopup() {
         )
       .append(
         $('<div>').attr({ class: 'loginDiv' }).html(
-          $('<a>').attr({ id: "btnLogin", class: "ui-btn Mybtn" }).text('Sign In')).append(
-              $('<a>').attr({ id: "btnLogin", class: "ui-btn Mybtn" }).text('Sign Up')
+          $('<a>').attr({ id: "btnLogin", class: "ui-btn Mybtn" }).text('Log In')).append(
+              $('<a>').attr({ id: "btnSignup", class: "ui-btn Mybtn" }).text('Sign Up')
               )
               ).append(buildSingUpForm())).prop('outerHTML');
 
@@ -186,11 +195,11 @@ function istAjaxValidateRequest(func, user) {
     if (func == "returnSession" && user.Email != "" && user.Password != "") {
         return true;
     }
-    if (validateUser(user)) {
-        return true;
+    if(func == "signUser"){
+       return true;
     }
 
-    return false;
+    return validateUser(user);
 }
 
 function doAjax(webService, _data, _function, _functionError) {
@@ -224,7 +233,7 @@ function setMenu(pageId, _user) {
     else {
         $('#statusBar').parent().attr("style", "padding:0px;");
         $('#containerStatusBar').attr('class', 'ui-grid-solo').html($("<div>").attr({ class: 'ui-block-a', id: 'conStatus' }));
-        $('#conStatus').html($("<a>").attr({ 'data-rel': 'popup', href: '#signIn', 'data-role': "button" }).addClass("ui-btn btnSignIn").text("Log In/Sign In").buttonMarkup());
+        $('#conStatus').html($("<a>").attr({ 'data-rel': 'popup', href: '#signIn', 'data-role': "button" }).addClass("ui-btn btnSignIn").text("Log In/Sign Up").buttonMarkup());
     }
 
     $("#menu li").each(function () {
@@ -278,16 +287,16 @@ function setSession(data) {
 
 function logOutRemoveDisplay() {
     $('#myOrdersListCollapsible').html(""); //init myorders page
-    var removeList = $("#menuList [hasrole=roleLi]"); //delete all user role Li
+    var removeList = $("#menuList [hasRole=roleLi]"); //delete all user role Li
     for (var i = 0 ; i < removeList.length ; i++) {
-        removeList[i].hide();
+        $(removeList[i]).hide();
     }
 }
 
 function logOnFillDisplay() {
     //TODO: open "CLOSED" section in menu, Fill user orders
     if ($('#menuList #MYORDERS').length == 0) {
-        $("#menuList").append($('<li id="MYORDERS">').attr({ class: 'roleLi' }).html($("<a>").attr({ href: "#myorders" }).addClass("ui-btn ui-btn-icon-right ui-icon-carat-r").text("My Orders")));
+        $("#menuList").append($('<li id="MYORDERS">').attr({ hasRole: 'roleLi' }).html($("<a>").attr({ href: "#myorders" }).addClass("ui-btn ui-btn-icon-right ui-icon-carat-r").text("My Orders")));
     }
     else {
         $('li [id=MYORDERS]').show();
@@ -390,39 +399,35 @@ function removeLoadingDiv(element) {
 }
 
 function buildSingUpForm() {
-    var string = $('<div id="formSingUp">').attr({ class: 'ui-grid-a' }).append(
-        $('<div>').attr({ class: "ui-block-a" }).html(buildBlock('UserName', 'text', 'true', 'User Name', 'signInBlock'))).
+    var string = $('<div>').attr({ class: 'ui-grid-a ' }).append(
+        $('<div>').attr({ class: "ui-block-a" }).html(buildBlock('FirstName', 'text', 'true', 'First Name', 'signInBlock'))).
         append(
         $('<div>').attr({ class: 'ui-block-b' }).html(buildBlock('LastName', 'text', 'true', 'Last Name', 'signInBlock'))).
         append(
         $('<div>').attr({ class: "ui-block-a" }).html(buildBlock('Email', 'text', 'true', 'Email', 'signInBlock'))).
         append(
-        $('<div>').attr({ class: 'ui-block-b' }).html(buildBlock('Password', 'text', 'true', 'Password', 'signInBlock'))).
+        $('<div>').attr({ class: 'ui-block-b' }).html(buildBlock('Password', 'password', 'true', 'Password', 'signInBlock'))).
         append(
         $('<div>').attr({ class: "ui-block-a" }).html(buildBlock('City', 'text', 'true', 'City', 'signInBlock'))).
         append(
-        $('<div>').attr({ class: 'ui-block-b' }).html(buildBlock('Address', 'text', 'true', 'Address', 'signInBlock'))).
-        //append($('<div class="ui-grid-solo">').html($('<div class="ui-block-a">').html(buildBlock('SignInBtn', 'button', 'false','', 'signInBlock')))).
+        $('<div>').attr({ class: 'ui-block-b' }).html(buildBlock('Address', '', 'true', 'Address', '', true) + $('<textarea>').attr({placeholder:"Address1, Address 2, ZipCode",style:'border:1px black solid','data-mini':true,id:'blkAddress',cols:20,rows:4}).prop('outerHTML'))).
         prop('outerHTML');
-    return string;
+    string += $('<a>').attr({ class: 'ui-btn Mybtn', href: '#', id: 'btnSubmitSignUp' }).text('Submit').on('tap',sendSignup).prop('outerHTML') + $('<div id="errSignUp" class="hidden">').hide().prop('outerHTML');
+
+    return $('<div id="formSignUp">').html(string).prop('outerHTML');
 }
 
-function buildBlock(id, inputType, isMinified, label, _class) {
-    var addLabel = "";
-
-    var astriks = $('<span>').attr({ class: "ui-icon ui-icon-github-alt ui-icon-shadow" }).prop('outerHTML');
-    ;
+function buildBlock(id, inputType, isMinified, label, _class,onlyLabel) {
+    var addLabel = "", input='';
     if (label != '') {
-        addLabel = '<label  id="lbl' + id + '" for="blk' + id + '">' + label + '</label>' + astriks;
+        addLabel = '<label  id="lbl' + id + '" for="blk' + id + '">' + label + '</label>';
     }
-    return '<div class="' + _class + '">' + addLabel + $('<input>').attr({ placeholder: label, id: 'blk' + id, name: 'blk' + id, type: inputType, 'data-mini': isMinified }).prop('outerHTML') + '</div>';
+    if (!onlyLabel) {
+        input = $('<input>').attr({ placeholder: label, id: 'blk' + id, name: 'blk' + id, type: inputType, 'data-mini': isMinified }).prop('outerHTML');
+    }
+    return '<div class="' + _class + '">' + addLabel + ' ' + input+ '</div>';
 
 }
-
-
-
-
-
 
 function uploadPic(path) {
     function win(r) {
@@ -457,4 +462,105 @@ function uploadPic(path) {
         }
     };
     ft.upload(path, uri, win, fail, options);
+}
+
+function validateSingUp() {
+    var emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    var errorMessage = '';
+    if ($('#blkFirstName').val().length == 0) {
+        errorMessage += '- First Name field is required<br/>';
+    }
+    if ($('#blkLastName').val().length == 0) {
+        errorMessage += '- Last Name field is required<br/>';
+    }
+    if ($('#blkEmail').val().length == 0) {
+        errorMessage += '- Email  field is required<br/>';
+    }
+    else {
+        if (!emailRegex.test($('#blkEmail').val())) {
+            errorMessage += '- Please enter valid Email address <br/>';
+        }
+    }
+    if ($('#blkPassword').val().length < 7) {
+        errorMessage += '- Password must be greater or equal than 8 characters<br/>';
+    }
+    if ($('#blkCity').val().length == 0) {
+        errorMessage += '- City  field is required<br/>';
+    }
+    if ($('#blkAddress').val().length == 0) {
+        errorMessage += '- Address  field is required<br/>';
+    }
+    return errorMessage;
+}
+
+function sendSignup() {
+    var tempUser = '';
+    var errMsg = validateSingUp();
+    if (!(errMsg.length == 0)) {
+        createErrQtip('err_' + $('#btnSubmitSignUp').attr('id'),$('#btnSubmitSignUp'),errMsg)
+        return;
+    }
+    $('#btnSubmitSignUp').qtip('destroy', true);
+    tempUser = {
+        Email: $('#blkEmail').val(),
+        First: $('#blkFirstName').val(),
+        Last: $('#blkLastName').val(),
+        Address: $('#blkAddress').val(),
+        Password: $('#blkPassword').val(),
+        City: $('#blkCity').val(),
+        _token: _user._token
+    }
+    doAjax('DoAjax', { func: 'signUser', user: tempUser }, function (data) {
+        createSuccessQtip('userInfo', $('#index [data-role=header]'), 'User: ' + tempUser.Email + ' Created Successfuly!');
+        setTimeout(function () {
+            $('#qtip-userInfo').remove();
+        }, 13000);
+        $('#btnSubmitSignUp').qtip('destroy', true);
+        $.mobile.changePage('#index');
+
+        
+    }, function (data, jqXHR) {
+        data = JSON.parse(data.responseText);
+        createErrQtip('serverErr', $('#btnSubmitSignUp'), data.d);
+    });
+}
+function createSuccessQtip(_id, element, msg) {
+    $(element).qtip({
+        id: _id,
+        content: {
+            text: msg
+        },
+        show: {
+            ready: true
+        },
+        hide:false,
+        style: {
+            classes: 'qtip-green qtip-rounded qtip-shadow'
+        },
+        position: {
+            my: 'top center',  // Position my top left...
+            at: 'bottom right',
+        }
+    });
+}
+function createErrQtip(_id,element,msg){
+    $(element).qtip({
+        id: _id,
+        content: {
+            text: msg
+        },
+        show: {
+            ready: true 
+        },
+        hide: {
+            inactive:7000
+        },
+        style:{
+            classes: 'qtip-red  qtip-rounded qtip-shadow'
+        },
+        position: {
+            my: 'bottom center',  // Position my top left...
+            at: 'top center',
+        }
+    });
 }
