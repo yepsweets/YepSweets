@@ -31,24 +31,24 @@ public class IceWS : System.Web.Services.WebService
     }
 
 
-    [WebMethod]
-    public string UploadFile()
-    {
-        string lreturn = "success";
-        try
-        {
-            HttpPostedFile file = HttpContext.Current.Request.Files["file"];
-            string saveFile = System.Web.HttpContext.Current.Request.MapPath(".")+"\\postedFiles\\" + file.FileName;
-            file.SaveAs(System.Web.HttpContext.Current.Request.MapPath(".") + "\\postedFiles\\" + file.FileName);
-        }
-        catch (Exception ex)
-        {
-            lreturn = "fail. " + ex.Message;
-        }
-        return lreturn;
-    }  
 
-    private string terminateRequst(HttpContext Context, string jsonMsg){
+    //public string UploadFile()
+    //{
+    //    string lreturn = "success";
+    //    try
+    //    {
+    //        HttpPostedFile file = HttpContext.Current.Request.Files["file"];
+    //        string saveFile = System.Web.HttpContext.Current.Request.MapPath(".")+"\\postedFiles\\" + file.FileName;
+    //        file.SaveAs(System.Web.HttpContext.Current.Request.MapPath(".") + "\\postedFiles\\" + file.FileName);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        lreturn = "fail. " + ex.Message;
+    //    }
+    //    return lreturn;
+    //}  
+
+    public string terminateRequst(HttpContext Context, string jsonMsg){
         Context.Response.Status = "403 Forbidden";
        // Context.Response.Write(jsonMsg);
         //the next line is untested - thanks to strider for this line
@@ -258,20 +258,32 @@ public class IceWS : System.Web.Services.WebService
         return ConvertTableToJsonList(getTable(sp,_params).Tables[0]);
     }
 
+    public string GetUserOrders(User user)
+    {
+        var param = new Dictionary<string, string>();
+        param.Add("param1", "@UserEmail");
+        param.Add("value1", user.Email);
+        string sp = "sp_getOrders";
+        var temp = getTable(sp, param).Tables[0];
+        if (temp.Rows.Count == 0)
+        {
+            return terminateRequst(Context, "no_data");
+        }
+
+        return ConvertTableToJsonList(temp);
+    }
+
     [WebMethod]
     public string GetYepBranches()
     {
         string sp = "sp_getBranches";
-        return ConvertTableToJsonList(getTable(sp,null).Tables[0]);
+        return ConvertTableToJsonList(getTable(sp, null).Tables[0]);
     }
-
-    public string GetUserOrders(User user)
+    [WebMethod]
+    public string GetMenuOptions()
     {
-        var param = new Dictionary<string,string>();
-        param.Add("param1", "@UserEmail");
-        param.Add("value1", user.Email);
-        string sp = "sp_getOrders";
-        return ConvertTableToJsonList(getTable(sp, param).Tables[0]);
+        string sp = "sp_getMenuOptions";
+        return ConvertTableToJsonList(getTable(sp, null).Tables[0]);
     }
 
     [WebMethod]

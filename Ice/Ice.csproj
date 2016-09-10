@@ -68,6 +68,7 @@
   <ItemGroup>
     <Content Include="HtmlPage1.html" />
     <Content Include="packages.config" />
+    <Content Include="uploadHandler.ashx" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -100,6 +101,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="uploadHandler.ashx.cs">
+      <DependentUpon>uploadHandler.ashx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup>

@@ -1,5 +1,7 @@
 /// <reference path="yepJs.js" />
 ajaxLoaderManager = { showLoadDiv: showLoadingDiv, removeLoadDiv: removeLoadingDiv };
+pagesNames = {'index' : 'HOME','uploadphoto':'UPLOAD PHOTO','branches': 'BRANCHES', 'myorders':'MY ORDERS'};
+
 const _emptyUser = JSON.stringify({ Email: "", First: "", Last: "", Address: "", Password: "", City: "", _token: "" });
 if (Cookies.getJSON("_user") == undefined || Cookies.getJSON("_user") == "null") {
 
@@ -9,7 +11,6 @@ if (Cookies.getJSON("_user") == undefined || Cookies.getJSON("_user") == "null")
 } else {
     _user = Cookies.getJSON("_user");
 }
-
 var _markers = [];
 var map;
 var defualtErr = function (xhr, errorType, exception) {
@@ -96,20 +97,33 @@ $(document).one("pagecreate", "#branches", function () {
 }); //this function handle branches page
 
 $(document).one('pagebeforecreate', function () {
-   
+
     //onDeviceReady();
     document.addEventListener("deviceready", onDeviceReady, false);
-
     var panel = buildMenu();
     var popup = buildPopup();
     $.mobile.pageContainer.prepend(panel);
     $.mobile.pageContainer.prepend(popup);
+    doAjax('GetMenuOptions', { func: 'GetMenuOptions', user: _user }, function (data) {
+        data = JSON.parse(data.d);
+        data = data.Table;
+        var res = "";
+        for (var i = 0 ; i < data.length; i++) {
+            if (data[i].Attributes.trim() == "") {
+                data[i].Attributes = '{"attr":"false"}';
+            }
+            res = $('<li>').attr({ id: data[i].MenuOption.trim() }).html($('<a href="' + data[i].Href.trim() + '" _href="' + data[i].Href.trim() + '">').text(data[i].MenuOption.trim()).attr(JSON.parse(data[i].Attributes)).prop('outerHTML')).prop('outerHTML');
+            $('#menuList').append(res);
+        }
+        $("#menuList").listview("refresh");
+
+    }, function (xhr, errorType, exception) { });
     $('#signIn').popup().enhanceWithin();
     $('#signIn #btnLogin').on("tap", sendLogin);
     $('#btnSignup').on("tap", function () {
         $('#formSignUp').show();
     });
-    $('#btnSubmitSignUp').on('tap',sendSignup);
+    $('#btnSubmitSignUp').on('tap', sendSignup);
     $("#menu").panel().enhanceWithin();
     sliderStart('#myorders');// init slider
     sliderStart('#index');// init slider
@@ -139,7 +153,15 @@ $(document).on("pageshow", "#myorders", function (event) {
         $("#myOrdersListCollapsible").collapsibleset("refresh"); // refresh collapsible
     }
 }); // init myorders page
-
+$(document).on("pageshow", "#uploadphoto", function (event) {
+    if (!validateUser(_user)) {
+        $.mobile.changePage('#index');
+    }
+    else {
+        $('#uploadphoto' + ' .menuLink').attr('href', '#menu');// bind menu button
+        setMenu('uploadphoto', _user); // init menu
+    }
+}); // init myorders page
 
 function buildPopup() {
 
@@ -189,14 +211,14 @@ function istAjaxValidateRequest(func, user) {
     if (func == null || "" == func) {
         return false;
     }
-    if (func == "GetYepBranches") {
+    if (func == "GetYepBranches" || func == "GetMenuOptions") {
         return true;
     }
     if (func == "returnSession" && user.Email != "" && user.Password != "") {
         return true;
     }
-    if(func == "signUser"){
-       return true;
+    if (func == "signUser") {
+        return true;
     }
 
     return validateUser(user);
@@ -214,49 +236,35 @@ function doAjax(webService, _data, _function, _functionError) {
             type: "POST",
             data: _data,
             contentType: "application/json; charset=utf-8",
-            error: _functionError,
-            beforeSend: ajaxLoaderManager.showLoadDiv($('.ui-page-active')),
-            success: function (data) { ajaxLoaderManager.removeLoadDiv($('.ui-page-active')); _function(data); }
-        });
+            error: function (xhr, errorType, exception) {
+                _functionError(xhr, errorType, exception)
+            },
+            beforeSend: function () {
+                ajaxLoaderManager.showLoadDiv($.mobile.activePage);
+            },
+            success: function (data) {
+                _function(data);
+            }
+        }).always(function () { ajaxLoaderManager.removeLoadDiv($.mobile.activePage); ajaxLoaderManager.removeLoadDiv($('#index')); });
     }
 
 }
 
 function setMenu(pageId, _user) {
     if (_user != undefined && _user.Email != "" && _user._token != "") {
-        logOnFillDisplay();
+        fixMenu(true);
         $('#containerStatusBar').attr({ class: 'ui-grid-a' }).html($("<div>").attr({ class: 'ui-block-a', id: 'conUserName' })).append($('<div>').attr({ class: 'ui-block-b', id: "conStatus" }));
         $("#conUserName").html($('<a data-role="button" >').addClass(" ui-btn leftStatusBarBtn").text(_user.First).buttonMarkup());
         $("#conStatus").html($('<a data-role="button" id="btnLogOut">').addClass(" ui-btn rightStatusBarBtn").text('Log Out').buttonMarkup());
         $('#btnLogOut').on('tap', _LogOut);
     }
     else {
+        fixMenu(false);
+        $('#myOrdersListCollapsible').html('');
         $('#statusBar').parent().attr("style", "padding:0px;");
         $('#containerStatusBar').attr('class', 'ui-grid-solo').html($("<div>").attr({ class: 'ui-block-a', id: 'conStatus' }));
         $('#conStatus').html($("<a>").attr({ 'data-rel': 'popup', href: '#signIn', 'data-role': "button" }).addClass("ui-btn btnSignIn").text("Log In/Sign Up").buttonMarkup());
     }
-
-    $("#menu li").each(function () {
-        var currentLi = $(this);
-        var link = currentLi.find("a");
-        var liId = currentLi.attr('id');
-        if (liId != undefined && liId != "") {
-            if (liId.toLowerCase() == pageId) {
-                currentLi.attr('data-role', 'list-divider');
-                link.attr('class', 'ui-btn');
-            }
-            else {
-                if (!validateUser(_user) && currentLi.hasClass('roleLi')) {
-                    currentLi.hide();
-                }
-                else {
-                    link.attr('href', '#' + liId.toLowerCase());
-                    $(this).removeAttr("data-role").removeAttr('class', '');
-                    link.attr('class', 'ui-btn ui-btn-icon-right ui-icon-carat-r');
-                }
-            }
-        }
-    });
     $("#menuList").listview("refresh");
     $("#statusBar").parent().attr("class", "no-margin"); //fix statusBar size
 
@@ -284,26 +292,49 @@ function setSession(data) {
     $.mobile.changePage('#index', { reloadPage: true });
 
 } //this function return at login = success.
-
-function logOutRemoveDisplay() {
-    $('#myOrdersListCollapsible').html(""); //init myorders page
-    var removeList = $("#menuList [hasRole=roleLi]"); //delete all user role Li
-    for (var i = 0 ; i < removeList.length ; i++) {
-        $(removeList[i]).hide();
-    }
+function fixMenu(toShow) {
+    $('#menu li').each(function () {
+        var $this = $(this);
+        var link = $this.find('a');
+        if ($this.attr('id') != undefined) {
+            if (link.attr('hasRole') == 'roleLi' && toShow) {
+                $this.show();
+            }
+            else {
+                if (link.attr('hasRole') != undefined) {
+                    $this.hide();
+                }
+            }
+            if ($this.attr('id').toLowerCase() == pagesNames[$.mobile.activePage.attr('id')].toLowerCase()) {
+                $this.attr('data-role', 'list-divider');
+                link.attr('class', 'ui-btn');
+            }
+            else {
+                // if (!validateUser(_user) && !currentLi.hasClass('roleLi')) {
+                $(this).removeAttr("data-role").removeAttr('class', '');
+                link.attr('class', 'ui-btn ui-btn-icon-right ui-icon-carat-r');
+            }
+        }
+    });
 }
 
-function logOnFillDisplay() {
-    //TODO: open "CLOSED" section in menu, Fill user orders
-    if ($('#menuList #MYORDERS').length == 0) {
-        $("#menuList").append($('<li id="MYORDERS">').attr({ hasRole: 'roleLi' }).html($("<a>").attr({ href: "#myorders" }).addClass("ui-btn ui-btn-icon-right ui-icon-carat-r").text("My Orders")));
-    }
-    else {
-        $('li [id=MYORDERS]').show();
-    }
-    //fillUserOrders(_userID,_token); ? is this belong here?
-    //doAjax(getUserOrders)<- TODO: display orders section 
-} // this function will bulid the dinamyc part of the app like: myorders,makeorder and futhure app.
+//function logOutRemoveDisplay() {
+//    $('#myOrdersListCollapsible').html(""); //init myorders page
+//    var removeList = $("#menuList [hasRole=roleLi]"); //delete all user role Li
+//    for (var i = 0 ; i < removeList.length ; i++) {
+//        $(removeList[i]).hide();
+//    }
+//    fixmenu(false);
+//}
+//function logOnFillDisplay() {
+//    //TODO: open "CLOSED" section in menu, Fill user orders
+//    fixMenu(true);
+//    var showList = $("#menuList [hasRole=roleLi]"); //show all user role Li
+//    for (var i = 0 ; i < showList.length ; i++) {
+//        $(showList[i]).show();
+//    }
+
+//} // this function will bulid the dinamyc part of the app like: myorders,makeorder and futhure app.
 
 function fillUserOrders(user) {
     //doAjax get orders and fill the data.
@@ -326,7 +357,17 @@ function fillUserOrders(user) {
                     $ordersCollapsible.append($("<div>").attr({ 'data-role': 'collapsible' }).html($("<h2>").html(hText)).append($("<div>").attr({ class: 'ui-grid-a' }).html(temp.prop('outerHTML'))));
                 }
                 $("#myOrdersListCollapsible").collapsibleset("refresh"); // refresh collapsible
-            }, defualtErr);
+            }, function (data, errorType, exception) {
+                if (data.responseJSON != undefined) {
+                    if (data.responseJSON.d == "no_data") {
+                        $('#myOrdersListCollapsible').append('<i class="fa fa-info-circle" aria-hidden="true"></i><span style="padding-left="5px"">You dont have orders yet.. fill welcome to make some orders.</span>');
+
+                    }
+                } else {
+                    $('#myOrdersListCollapsible').append('<i class="fa fa-info-circle" aria-hidden="true"></i><span style="margin-left="5px""> Opps... something wrong, please check status.</span>');
+
+                }
+            });
     }
 } //this function manage ths myorders page data.
 
@@ -356,15 +397,11 @@ function validateLogIn(user) {
 } //this function validate text box in Login page
 
 function buildMenu() {
-    //cheching vars        $('#statusBar').html($('<div id="containerStatusBar" class="ui-grid-a">'));
-    var string = '';
-    //prepering code
-    string = $('<div>').attr({ 'data-role': 'panel', id: "menu", 'data-position': "right", 'data-display': "push" }).html(
-      $('<ul>').attr({ 'data-role': "listview", id: "menuList" }).html(
-        $('<li>').html($('<div>').attr({ id: 'statusBar' }).html($('<div>').attr({ id: 'containerStatusBar' }))).prop('outerHTML')).append(
-        $('<li>').attr({ id: 'INDEX' }).html($('<a>').text('Home')).prop('outerHTML')).append(
-        $('<li>').attr({ id: 'BRANCHES' }).html($('<a>').text('Branches')).prop('outerHTML'))).prop('outerHTML');
-    return string;
+        //prepering code
+        temp = $('<div>').attr({ 'data-role': 'panel', id: "menu", 'data-position': "right", 'data-display': "push" }).html(
+               $('<ul>').attr({id:'menuList' , 'data-role': "listview", id: "menuList" }).html(
+               $('<li>').html($('<div>').attr({ id: 'statusBar' }).html($('<div>').attr({ id: 'containerStatusBar' }))).prop('outerHTML'))).prop('outerHTML');
+        return temp;
 }//this function return a menu as string
 
 function sliderStart(pageIdWithHash) {
@@ -385,17 +422,21 @@ function _LogOut() {
     //Cookies.remove('_user');
     _user = JSON.parse(_emptyUser);
     Cookies.remove("_user");
-    logOutRemoveDisplay();
+    fixMenu(false);
     $.mobile.changePage('#index', { reloadPage: true });
 } // this return app to wait login state
 
 function showLoadingDiv(element) {
-    element.append($("<div>").attr({ id: 'fadeLoadingDiv', class: 'fadeLoadingDiv' })).append($("<div>").attr({ id: 'modelLoadingDiv', class: 'modelLoadingDiv' }).append($('<img>').attr({ src: 'images/loading.gif' })));
+    if (element != undefined) {
+        element.append($("<div>").attr({ id: 'fadeLoadingDiv', class: 'fadeLoadingDiv' })).append($("<div>").attr({ id: 'modelLoadingDiv', class: 'modelLoadingDiv' }).append($('<img>').attr({ src: 'images/loading.gif' })));
+    }
 }
 
 function removeLoadingDiv(element) {
-    element.find('#modelLoadingDiv').remove();
-    element.find('#fadeLoadingDiv').remove();
+    if (element != undefined) {
+        element.find('#modelLoadingDiv').remove();
+        element.find('#fadeLoadingDiv').remove();
+    }
 }
 
 function buildSingUpForm() {
@@ -410,49 +451,46 @@ function buildSingUpForm() {
         append(
         $('<div>').attr({ class: "ui-block-a" }).html(buildBlock('City', 'text', 'true', 'City', 'signInBlock'))).
         append(
-        $('<div>').attr({ class: 'ui-block-b' }).html(buildBlock('Address', '', 'true', 'Address', '', true) + $('<textarea>').attr({placeholder:"Address1, Address 2, ZipCode",style:'border:1px black solid','data-mini':true,id:'blkAddress',cols:20,rows:4}).prop('outerHTML'))).
+        $('<div>').attr({ class: 'ui-block-b' }).html(buildBlock('Address', '', 'true', 'Address', '', true) + $('<textarea>').attr({ placeholder: "Address1, Address 2, ZipCode", style: 'border:1px black solid', 'data-mini': true, id: 'blkAddress', cols: 20, rows: 4 }).prop('outerHTML'))).
         prop('outerHTML');
-    string += $('<a>').attr({ class: 'ui-btn Mybtn', href: '#', id: 'btnSubmitSignUp' }).text('Submit').on('tap',sendSignup).prop('outerHTML') + $('<div id="errSignUp" class="hidden">').hide().prop('outerHTML');
+    string += $('<a>').attr({ class: 'ui-btn Mybtn', href: '#', id: 'btnSubmitSignUp' }).text('Submit').on('tap', sendSignup).prop('outerHTML') + $('<div id="errSignUp" class="hidden">').hide().prop('outerHTML');
 
     return $('<div id="formSignUp">').html(string).prop('outerHTML');
 }
 
-function buildBlock(id, inputType, isMinified, label, _class,onlyLabel) {
-    var addLabel = "", input='';
+function buildBlock(id, inputType, isMinified, label, _class, onlyLabel) {
+    var addLabel = "", input = '';
     if (label != '') {
         addLabel = '<label  id="lbl' + id + '" for="blk' + id + '">' + label + '</label>';
     }
     if (!onlyLabel) {
         input = $('<input>').attr({ placeholder: label, id: 'blk' + id, name: 'blk' + id, type: inputType, 'data-mini': isMinified }).prop('outerHTML');
     }
-    return '<div class="' + _class + '">' + addLabel + ' ' + input+ '</div>';
+    return '<div class="' + _class + '">' + addLabel + ' ' + input + '</div>';
 
 }
 
 function uploadPic(path) {
     function win(r) {
-        alert("Code = " + r.responseCode);
+        alert("Code = " + responseText);
         console.log("Response = " + r.response);
         console.log("Sent = " + r.bytesSent);
     }
 
     function fail(error) {
-        alert("An error has occurred: Code = " + error.code);
+        alert(error.responseText);
         console.log("upload error source " + error.source);
         console.log("upload error target " + error.target);
     }
 
-    var uri = encodeURI("http://proj.ruppin.ac.il/cegroup3/prod/IceWS.asmx/UploadFile");
+    var uri = encodeURI("http://proj.ruppin.ac.il/cegroup3/prod/uploadHandler.ashx");
 
     var options = new FileUploadOptions();
     options.fileKey = "file";
     options.fileName = path.substr(path.lastIndexOf('/') + 1);
     options.mimeType = "image/jpeg";
-
-    var headers = { 'headerParam': 'headerValue' };
-
-    options.headers = headers;
-
+    options.email = _user.Email;
+    options.SessionID = _user._token;
     var ft = new FileTransfer();
     ft.onprogress = function (progressEvent) {
         if (progressEvent.lengthComputable) {
@@ -497,7 +535,8 @@ function sendSignup() {
     var tempUser = '';
     var errMsg = validateSingUp();
     if (!(errMsg.length == 0)) {
-        createErrQtip('err_' + $('#btnSubmitSignUp').attr('id'),$('#btnSubmitSignUp'),errMsg)
+        $('#btnSubmitSignUp').focus();
+        createErrQtip('err_' + $('#btnSubmitSignUp').attr('id'), $('#btnSubmitSignUp'), errMsg)
         return;
     }
     $('#btnSubmitSignUp').qtip('destroy', true);
@@ -514,17 +553,23 @@ function sendSignup() {
         createSuccessQtip('userInfo', $('#index [data-role=header]'), 'User: ' + tempUser.Email + ' Created Successfuly!');
         setTimeout(function () {
             $('#qtip-userInfo').remove();
-        }, 13000);
+        }, 10000);
         $('#btnSubmitSignUp').qtip('destroy', true);
         $.mobile.changePage('#index');
 
-        
+
     }, function (data, jqXHR) {
-        data = JSON.parse(data.responseText);
-        createErrQtip('serverErr', $('#btnSubmitSignUp'), data.d);
+        data = (data.responseText == '') ? '- Opps... something wrong, please check status.' : data.responseText;
+        createErrQtip('serverErr', $('#btnSubmitSignUp'), data);
+
     });
 }
+
 function createSuccessQtip(_id, element, msg) {
+    $('#menu').panel('close');
+    if (element == 'page') {
+        element = $.mobile.activePage;
+    }
     $(element).qtip({
         id: _id,
         content: {
@@ -533,29 +578,31 @@ function createSuccessQtip(_id, element, msg) {
         show: {
             ready: true
         },
-        hide:false,
+        hide: false,
         style: {
-            classes: 'qtip-green qtip-rounded qtip-shadow'
+            classes: 'my-qtip qtip-green qtip-rounded qtip-shadow'
         },
         position: {
             my: 'top center',  // Position my top left...
-            at: 'bottom right',
+            at: 'bottom center',
+            target: element
         }
     });
 }
-function createErrQtip(_id,element,msg){
+
+function createErrQtip(_id, element, msg) {
     $(element).qtip({
         id: _id,
         content: {
             text: msg
         },
         show: {
-            ready: true 
+            ready: true
         },
         hide: {
-            inactive:7000
+            inactive: 7000
         },
-        style:{
+        style: {
             classes: 'qtip-red  qtip-rounded qtip-shadow'
         },
         position: {
@@ -564,3 +611,4 @@ function createErrQtip(_id,element,msg){
         }
     });
 }
+

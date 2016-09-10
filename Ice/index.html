@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
     <link rel="stylesheet" href="style/yepStyle.css" />
     <link rel="stylesheet" href="http://cdn.jsdelivr.net/qtip2/3.0.3/jquery.qtip.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
 
 
     <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -52,8 +53,7 @@
 				<div class="body-post">
 					<p class="arial">You are in the right place! Here you can buy the sweetest things ever!</p>
 					<p class="time">You are in the right place! Here you can buy the sweetest things ever!</p>
-					<p class="else">You can also go to <input id="btnTake" type="button" value="camera" /></p>
-                    <p style="background-color:yellow;height:25px;width:25px;" class="" id="progressBar"></p>
+					
                 </div>
 			</div>
 
@@ -214,7 +214,43 @@
 
             <div class="seperator"></div>
         </div>
-    </div><!-- index page -->
+    </div><!-- my orders page -->
+
+    <div data-role="page" id="uploadphoto">
+
+        <div data-role="header" data-position="fixed" class="header">
+            <div class="ui-grid-a">
+                <div class="ui-block-a"><img src="images/YepMobileLogo.png"></div>
+                <div class="ui-block-b"><a class="menuLink" href="#menu"><img src="images/MenuIcon.png"></a></div>
+            </div><!--Logo Section-->
+        </div>
+
+        <div data-role="content">
+
+            <div class="mySlide">
+                <div><img src="images/slider/IceCreamStick.jpg" alt="IceCreamStick.jpg"></div>
+                <div><img src="images/slider/Berries_Ice_Cream.jpg" alt="Berries_Ice_Cream.jpg"></div>
+                <div><img src="images/slider/Dessert_Ice_Cream.jpg" alt="Dessert_Ice_Cream.jpg"></div>
+                <div><img src="images/slider/StrawberryVanilla.jpg" alt="StrawberryVanilla.jpg"></div>
+            </div><!-- Slide Show -->
+
+            <div class="postDiv">
+                <div class="ui-grid-a">
+                    <div class="ui-block-a"><h2>UPLOAD PHOTO!</h2></div>
+                    <div class="ui-block-b"><a class="featureIcon" href="#"><img src="images/YepMobileFacebookIcon.png"></a><a class="featureIcon" href="#"><img src="images/YepMobileTwitterIcon.png"></a></div>
+                </div>
+                <div class="body-post">
+                    <div class="ui-grid-solo">
+                        <p class="else">Upload Your Photo Now: <input id="btnTake" type="button" value="camera" /></p>
+                        <p style="background-color:yellow;height:25px;width:25px;" class="" id="progressBar"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="seperator"></div>
+        </div>
+    </div><!-- my orders page -->
+
 
 
 </body>

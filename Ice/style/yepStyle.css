@@ -19,9 +19,7 @@ PostDiv background color : light gray - #eeeeee
   color: pink;
 }
 
-*{
-	font-family: "Roboto", sans-serif !important;
-}
+
 h2{
 	margin: 0 auto;
 }
@@ -290,8 +288,12 @@ h3{
     content: '*';
     color:red;
 }
-
-
+.my-qtip{
+    margin: 5px !important;
+}
+.ui-listview>.ui-li-static {
+     padding: 0px !important;
+}
 
 
 
