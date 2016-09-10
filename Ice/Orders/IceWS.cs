@@ -23,21 +23,7 @@ public class IceWS : System.Web.Services.WebService
         //InitializeComponent(); 
     }
 
-    //[WebMethod]
-    //public string[] CurrentDateAndTime()
-    //{
-    //    string[] time = new string[2];
-    //    time[0] = DateTime.Now.ToShortTimeString();
-    //    time[1] = DateTime.Now.ToShortDateString();
-    //    return time;
-    //}
-    [WebMethod]
-    public List<Yep> GetYepBranches()
-    {
-        string sp = "sp_getBranches";
-        return ConvertDataToString(getTable(sp));
-    }
-
+    
     [WebMethod]
     public int addProduct(string ProductName)
     {
@@ -47,6 +33,27 @@ public class IceWS : System.Web.Services.WebService
         SqlCommand com = new SqlCommand(sp, con);
         com.CommandType = CommandType.StoredProcedure;
         com.Parameters.AddWithValue("@ProductName", ProductName);
+        com.Connection.Open();
+        rows = com.ExecuteNonQuery();
+        return rows;
+    }
+
+    [WebMethod]
+    public int submitOrder(string UserEmail, string FirstName, string LastName, string PhoneNumber, string CreditCardNumber, string DateTime, string Address, string Body)
+    {
+        int rows;
+        string sp = "sp_submitOrder";
+        SqlConnection con = new SqlConnection(conStr);
+        SqlCommand com = new SqlCommand(sp, con);
+        com.CommandType = CommandType.StoredProcedure;
+        com.Parameters.AddWithValue("@UserEmail", UserEmail);
+        com.Parameters.AddWithValue("@FirstName", FirstName);
+        com.Parameters.AddWithValue("@LastName", LastName);
+        com.Parameters.AddWithValue("@PhoneNumber", PhoneNumber);
+        com.Parameters.AddWithValue("@CreditCardNumber", CreditCardNumber);
+        com.Parameters.AddWithValue("@DateTime", DateTime);
+        com.Parameters.AddWithValue("@Address", Address);
+        com.Parameters.AddWithValue("@Body", Body);
         com.Connection.Open();
         rows = com.ExecuteNonQuery();
         return rows;
@@ -87,6 +94,7 @@ public class IceWS : System.Web.Services.WebService
         return ConvertDataToString(getTable(sp));
     }
 
+
     [WebMethod]
     public List<Yep> GetAddOns()
     {
@@ -94,11 +102,19 @@ public class IceWS : System.Web.Services.WebService
         return ConvertDataToString(getTable(sp));
     }
 
+ 
 
     [WebMethod]
     public List<Yep> GetSizes()
     {
         string sp = "sp_getSizes";
+        return ConvertDataToString(getTable(sp));
+    }
+
+    [WebMethod]
+    public List<Yep> GetSizesPrices()
+    {
+        string sp = "sp_getSizesAndPrices";
         return ConvertDataToString(getTable(sp));
     }
 
@@ -145,5 +161,6 @@ public class Yep
     public string colName { get; set; }
     public object value { get; set; }
     public Yep(string colName, object value) { this.colName = colName; this.value = value; }
-  
+    public Yep() { }
 }
+
