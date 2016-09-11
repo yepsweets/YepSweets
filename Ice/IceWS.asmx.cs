@@ -5,9 +5,13 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.Services;
+using System.Globalization;
+using System.Text.RegularExpressions;
+
 
 /// <summary>
 /// Summary description for IceWS
@@ -28,15 +32,62 @@ public class IceWS : System.Web.Services.WebService
 
 
 
-    private string terminateRequst(HttpContext Context){
+    //public string UploadFile()
+    //{
+    //    string lreturn = "success";
+    //    try
+    //    {
+    //        HttpPostedFile file = HttpContext.Current.Request.Files["file"];
+    //        string saveFile = System.Web.HttpContext.Current.Request.MapPath(".")+"\\postedFiles\\" + file.FileName;
+    //        file.SaveAs(System.Web.HttpContext.Current.Request.MapPath(".") + "\\postedFiles\\" + file.FileName);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        lreturn = "fail. " + ex.Message;
+    //    }
+    //    return lreturn;
+    //}  
+
+    public string terminateRequst(HttpContext Context, string jsonMsg){
         Context.Response.Status = "403 Forbidden";
+       // Context.Response.Write(jsonMsg);
         //the next line is untested - thanks to strider for this line
         Context.Response.StatusCode = 403;
         //the next line can result in a ThreadAbortException
         //Context.Response.End(); 
         Context.ApplicationInstance.CompleteRequest();
-        return null;
+        return jsonMsg;
 
+    }
+
+    public string SingUpUser(User user)
+    {
+        var _params = new Dictionary<string, string>();
+        string errMsg = validateUserSignUp(user);
+        if (!"".Equals(errMsg))
+        {
+            return terminateRequst(Context,errMsg);
+        }
+        _params.Add("param1","@FirstName");
+        _params.Add("value1", user.First.ToString());
+        _params.Add("param2", "@LastName");
+        _params.Add("value2", user.Last.ToString());
+        _params.Add("param3", "@Email");
+        _params.Add("value3", user.Email.ToString());
+        _params.Add("param4", "@Password");
+        _params.Add("value4", user.Password.ToString());
+        _params.Add("param5", "@City");
+        _params.Add("value5", user.City.ToString());
+        _params.Add("param6", "@Address");
+        _params.Add("value6", user.Address.ToString());
+
+        var res = getTable("sp_signUpNewUser",_params).Tables[0].Rows[0][0];
+        if ("0".Equals(res.ToString()))
+        {
+            return terminateRequst(Context, "Email is allready exists in our system, did you forget your paasword?");
+        }
+        return "User created successfully";
+    
     }
 
     public Boolean ValidateUserToken(User user)
@@ -77,27 +128,37 @@ public class IceWS : System.Web.Services.WebService
         }
         return true;
     }
-    private string ValidateUser(User user)
+ 
+    private Boolean ValidateUser(User user)
     {
-        if(user == null || ("email:"+"first:"+"last:"+"address:"+"password:"+"_token:").Equals(user.toString())){
-            return null;
+        if (user == null || "".Equals(user.Email) || "".Equals(user.Password))
+        {
+            return false;
         }
-        string sp = "sp_doValidateUser", res = "0";
+        string sp = "sp_doValidateUser";
         Dictionary<string,string> _params = new Dictionary<string, string>();
         _params.Add("param1", "@UserEmail");
         _params.Add("value1", user.Email);
 
         _params.Add("param2", "@UserPassword");
         _params.Add("value2", user.Password);
-
-        res = ConvertTableToJsonList( getTable(sp, _params).Tables[0] );
-        if("0".Equals(res))
-        { 
-            res = "0";
+        try
+        {
+            var res = int.Parse(getTable(sp, _params).Tables[0].Rows[0][0].ToString());
+            if ("0".Equals(res))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
-        return res;
+        catch (Exception e)
+        {
+            return false;
+        }
     }
-
 
     [WebMethod(EnableSession = true)]
     public string DoAjax(string func, string user)
@@ -119,30 +180,75 @@ public class IceWS : System.Web.Services.WebService
 
     private bool isAjaxRequestValidate(string func,User user)
     {
-        if (func == null || "".Equals(func.ToString()))
+        if ("".Equals(func.ToString()))
         {
             return false;
         }
-        if (func == "returnSession")
+        if ("returnSession".Equals(func.ToString()))
         {
             if (!"".Equals(user.Email) && !"".Equals(user.Password))
             {
                 return true;
             }
         }
+        if ("signUser".Equals(func.ToString()))
+        {
+            return true;
+        }
 
         return ValidateUserToken(user);
+    }
+
+    private string validateUserSignUp(global::User user)
+    {
+        string userSignUpErr = "";
+        if ("".Equals(user.First))
+        {
+            userSignUpErr += "- First Name field required<br>";
+        }
+        if ("".Equals(user.Last))
+        {
+             userSignUpErr += "- Last Name field required<br>";
+        }
+        if ("".Equals(user.City))
+        {
+             userSignUpErr += @"- City field required<br>";
+        }
+        if ("".Equals(user.Address))
+        {
+            userSignUpErr += "- Address field required<br>";
+        }
+        if ("".Equals(user.Password))
+        {
+            userSignUpErr += "- Password field required<br>";
+        }
+        else
+        {
+            if (user.Password.Length < 7)
+            {
+                userSignUpErr += "- Password must be greater or equal than 8 characters<br>";
+            }
+        }
+        if ("".Equals(user.Email))
+        {
+            userSignUpErr += "- Email field required<br>";
+        }
+        else
+        {
+            if (!(new RegexUtilities()).IsValidEmail(user.Email))
+            {
+                userSignUpErr += "- Email is not valid<br>";
+            }
+        }
+
+        return userSignUpErr;
     }
     
     public string GetSession(User user)
     {
-        if (user.Email == null || user.Password == null || "".Equals(user.Email) || "".Equals(user.Password))
+        if (!ValidateUser(user))
         {
-            return terminateRequst(Context);        
-        } // 0 means no logical session
-        if ("0".Equals(this.ValidateUser(user)))
-        {
-            return terminateRequst(Context);
+            return terminateRequst(Context,"");
         }
 
         string sp = "sp_getSession";
@@ -152,22 +258,33 @@ public class IceWS : System.Web.Services.WebService
         return ConvertTableToJsonList(getTable(sp,_params).Tables[0]);
     }
 
+    public string GetUserOrders(User user)
+    {
+        var param = new Dictionary<string, string>();
+        param.Add("param1", "@UserEmail");
+        param.Add("value1", user.Email);
+        string sp = "sp_getOrders";
+        var temp = getTable(sp, param).Tables[0];
+        if (temp.Rows.Count == 0)
+        {
+            return terminateRequst(Context, "no_data");
+        }
+
+        return ConvertTableToJsonList(temp);
+    }
+
     [WebMethod]
     public string GetYepBranches()
     {
         string sp = "sp_getBranches";
-        return ConvertTableToJsonList(getTable(sp,null).Tables[0]);
+        return ConvertTableToJsonList(getTable(sp, null).Tables[0]);
     }
-
-    public string GetUserOrders(User user)
+    [WebMethod]
+    public string GetMenuOptions()
     {
-        var param = new Dictionary<string,string>();
-        param.Add("param1", "@UserEmail");
-        param.Add("value1", user.Email);
-        string sp = "sp_getOrders";
-        return ConvertTableToJsonList(getTable(sp, param).Tables[0]);
+        string sp = "sp_getMenuOptions";
+        return ConvertTableToJsonList(getTable(sp, null).Tables[0]);
     }
-
 
     [WebMethod]
     public int addProduct(string ProductName)
@@ -210,7 +327,6 @@ public class IceWS : System.Web.Services.WebService
         string sp = "sp_getFlavors";
         return ConvertDataToString(getTable(sp,null));
     }
-
 
     private DataSet getTable(string storedProcedure,Dictionary<string,string> param)
     {
@@ -315,6 +431,7 @@ public class User
         this.Last = "";
         this.Address = "";
         this.Password = "";
+        this.City = "";
         this._token = "";
     }
     public string Email
@@ -357,52 +474,112 @@ public class User
         return "email:" + this.Email + "first:" + this.First + "last:" + this.Last + "address:" + this.Address + "password:" + this.Password + "_token" + this._token;
     }
 }
-
-
-public class Method{
+public class Method
+{
     const int VLIDATE_SESSION_FUNCTION = 1;
     const int GET_SESSION = 2;
     const int GET_USER_ORDERS = 3;
     const int GET_YEP_BRANCHES = 4;
+    const int SIGN_UP_USER = 5;
     public User user = new User();
     Dictionary<string, int> functionKey = new Dictionary<string, int>()
     {
         {"getLoginStatus", VLIDATE_SESSION_FUNCTION},
         {"returnSession", GET_SESSION},
         {"getUserOrders",GET_USER_ORDERS},
-        {"funcGetBranches",GET_YEP_BRANCHES}
+        {"funcGetBranches",GET_YEP_BRANCHES},
+        {"signUser",SIGN_UP_USER}
     };
 
-    public Method(string func,User user)
+    public Method(string func, User user)
     {
         this.user.Email = user.Email;
         this.user.First = user.First;
         this.user.Last = user.Last;
         this.user.Address = user.Address;
+        this.user.City = user.City;
         this.user._token = user._token;
         this.user.Password = user.Password;
         this._func = func;
     }
     public string _func
     {
-        get;set;
+        get;
+        set;
     }
-    
-    public string Invok(){
 
-        switch(functionKey[this._func]){
+    public string Invok()
+    {
+
+        switch (functionKey[this._func])
+        {
             //case 1:
             //return (new IceWS()).ValidateUserToken(this.user).ToString();
             case 2:
-            return (new IceWS()).GetSession(this.user);
+                return (new IceWS()).GetSession(this.user);
             case 3:
-            return (new IceWS()).GetUserOrders(this.user);
-            case 4:
-            return (new IceWS()).GetYepBranches();
+                return (new IceWS()).GetUserOrders(this.user);
+            //case 4:
+            //    return (new IceWS()).GetYepBranches();
+            case 5:
+                return (new IceWS()).SingUpUser(this.user);
+
         }
         return "";
     }
+
+
 }
+public class RegexUtilities
+{
+    bool invalid = false;
+    public bool IsValidEmail(string strIn)
+    {
+        invalid = false;
+        if (String.IsNullOrEmpty(strIn))
+            return false;
 
+        // Use IdnMapping class to convert Unicode domain names.
+        try
+        {
+            strIn = Regex.Replace(strIn, @"(@)(.+)$", this.DomainMapper,
+                                  RegexOptions.None, TimeSpan.FromMilliseconds(200));
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return false;
+        }
 
+        if (invalid)
+            return false;
 
+        // Return true if strIn is in valid e-mail format.
+        try
+        {
+            return Regex.IsMatch(strIn,
+                  @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
+                  @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-\w]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
+                  RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return false;
+        }
+    }
+    private string DomainMapper(Match match)
+    {
+        // IdnMapping class with default property values.
+        IdnMapping idn = new IdnMapping();
+
+        string domainName = match.Groups[2].Value;
+        try
+        {
+            domainName = idn.GetAscii(domainName);
+        }
+        catch (ArgumentException)
+        {
+            invalid = true;
+        }
+        return match.Groups[1].Value + domainName;
+    }
+}
