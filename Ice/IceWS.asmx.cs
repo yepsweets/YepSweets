@@ -48,9 +48,10 @@ public class IceWS : System.Web.Services.WebService
     //    return lreturn;
     //}  
 
-    public string terminateRequst(HttpContext Context, string jsonMsg){
+    public string terminateRequst(HttpContext Context, string jsonMsg)
+    {
         Context.Response.Status = "403 Forbidden";
-       // Context.Response.Write(jsonMsg);
+        // Context.Response.Write(jsonMsg);
         //the next line is untested - thanks to strider for this line
         Context.Response.StatusCode = 403;
         //the next line can result in a ThreadAbortException
@@ -66,9 +67,9 @@ public class IceWS : System.Web.Services.WebService
         string errMsg = validateUserSignUp(user);
         if (!"".Equals(errMsg))
         {
-            return terminateRequst(Context,errMsg);
+            return terminateRequst(Context, errMsg);
         }
-        _params.Add("param1","@FirstName");
+        _params.Add("param1", "@FirstName");
         _params.Add("value1", user.First.ToString());
         _params.Add("param2", "@LastName");
         _params.Add("value2", user.Last.ToString());
@@ -81,13 +82,13 @@ public class IceWS : System.Web.Services.WebService
         _params.Add("param6", "@Address");
         _params.Add("value6", user.Address.ToString());
 
-        var res = getTable("sp_signUpNewUser",_params).Tables[0].Rows[0][0];
+        var res = getTable("sp_signUpNewUser", _params).Tables[0].Rows[0][0];
         if ("0".Equals(res.ToString()))
         {
             return terminateRequst(Context, "Email is allready exists in our system, did you forget your paasword?");
         }
         return "User created successfully";
-    
+
     }
 
     public Boolean ValidateUserToken(User user)
@@ -100,6 +101,7 @@ public class IceWS : System.Web.Services.WebService
 
         string sp = "sp_getSessionWithID";
         var _params = new Dictionary<string, string>();
+        string _minutes="";
         _params.Add("param1", "@UserEmail");
         _params.Add("value1", user.Email);
         _params.Add("param2", "@sessionID");
@@ -108,7 +110,15 @@ public class IceWS : System.Web.Services.WebService
         {
             return false;
         }
-        var _minutes = Session["TTL"].ToString() ?? "";
+
+        try
+        {
+            _minutes = Session["TTL"].ToString() ?? "0";
+        }
+        catch(Exception e)
+        {
+            _minutes = "0";
+        }
         if (int.Parse(_minutes.ToString()) < 10)
         {
             _params = new Dictionary<string, string>();
@@ -124,11 +134,11 @@ public class IceWS : System.Web.Services.WebService
             {
                 return false;
             }
-           
+
         }
         return true;
     }
- 
+
     private Boolean ValidateUser(User user)
     {
         if (user == null || "".Equals(user.Email) || "".Equals(user.Password))
@@ -136,7 +146,7 @@ public class IceWS : System.Web.Services.WebService
             return false;
         }
         string sp = "sp_doValidateUser";
-        Dictionary<string,string> _params = new Dictionary<string, string>();
+        Dictionary<string, string> _params = new Dictionary<string, string>();
         _params.Add("param1", "@UserEmail");
         _params.Add("value1", user.Email);
 
@@ -169,16 +179,16 @@ public class IceWS : System.Web.Services.WebService
         }
         //user json format: "{\"Email\":\"pini@c.com,\",\"First\":\"Pini\",\"Last\":\"Ke\",\"Address\":\"Kadima\",\"Password\":\"\",\"City\":\"\",\"_token\":\"519\"}";
         var _user = (User)(ser.Deserialize(user, typeof(User)));
-        if (!isAjaxRequestValidate(func,_user))
+        if (!isAjaxRequestValidate(func, _user))
         {
             Context.Response.StatusDescription = "מזה החרא הזה?אגקס זה נוזל כלים בכלל!";
             Context.Response.StatusCode = 403;
             return null;
         }
-        return (new Method(func,_user)).Invok();
+        return (new Method(func, _user)).Invok();
     }
 
-    private bool isAjaxRequestValidate(string func,User user)
+    public bool isAjaxRequestValidate(string func, User user)
     {
         if ("".Equals(func.ToString()))
         {
@@ -208,11 +218,11 @@ public class IceWS : System.Web.Services.WebService
         }
         if ("".Equals(user.Last))
         {
-             userSignUpErr += "- Last Name field required<br>";
+            userSignUpErr += "- Last Name field required<br>";
         }
         if ("".Equals(user.City))
         {
-             userSignUpErr += @"- City field required<br>";
+            userSignUpErr += @"- City field required<br>";
         }
         if ("".Equals(user.Address))
         {
@@ -243,19 +253,19 @@ public class IceWS : System.Web.Services.WebService
 
         return userSignUpErr;
     }
-    
+
     public string GetSession(User user)
     {
         if (!ValidateUser(user))
         {
-            return terminateRequst(Context,"");
+            return terminateRequst(Context, "");
         }
 
         string sp = "sp_getSession";
-        Dictionary<string,string> _params = new Dictionary<string,string>();
-        _params.Add("param1","@UserEmail");
-        _params.Add("value1",user.Email.ToString());
-        return ConvertTableToJsonList(getTable(sp,_params).Tables[0]);
+        Dictionary<string, string> _params = new Dictionary<string, string>();
+        _params.Add("param1", "@UserEmail");
+        _params.Add("value1", user.Email.ToString());
+        return ConvertTableToJsonList(getTable(sp, _params).Tables[0]);
     }
 
     public string GetUserOrders(User user)
@@ -304,7 +314,7 @@ public class IceWS : System.Web.Services.WebService
     public List<Yep> GetProducts()
     {
         string sp = "sp_getProducts";
-        return ConvertDataToString(getTable(sp,null));
+        return ConvertDataToString(getTable(sp, null));
     }
 
     [WebMethod]
@@ -325,10 +335,10 @@ public class IceWS : System.Web.Services.WebService
     public List<Yep> GetFlavors()
     {
         string sp = "sp_getFlavors";
-        return ConvertDataToString(getTable(sp,null));
+        return ConvertDataToString(getTable(sp, null));
     }
 
-    private DataSet getTable(string storedProcedure,Dictionary<string,string> param)
+    public DataSet getTable(string storedProcedure, Dictionary<string, string> param)
     {
         //DataTable dt = new DataTable();
         DataSet ds = new DataSet();//
@@ -339,9 +349,9 @@ public class IceWS : System.Web.Services.WebService
                 cmd.CommandType = CommandType.StoredProcedure;
                 if (param != null)
                 {
-                    for (var i = 1; i <= param.Count/2; i++ )
+                    for (var i = 1; i <= param.Count / 2; i++)
                     {
-                        cmd.Parameters.AddWithValue(param["param"+i], param["value"+i]);
+                        cmd.Parameters.AddWithValue(param["param" + i], param["value" + i]);
                     }
                 }
                 con.Open();
@@ -399,14 +409,14 @@ public class IceWS : System.Web.Services.WebService
             foreach (DataRow dr in dt.Rows)
             {
                 Yep row;
-               // row = new Dictionary<string, object>();
+                // row = new Dictionary<string, object>();
                 foreach (DataColumn col in dt.Columns)
                 {
                     row = new Yep(col.ColumnName, dr[col]);
                     //row.Add(col.ColumnName, dr[col]);
                     rows.Add(row);
                 }
-                
+
             }
         }
         return rows;
@@ -418,14 +428,26 @@ public class Yep
     public Yep()
     {
     }
-    public string colName { get; set; }
-    public object value { get; set; }
-    public Yep (string colName, object value) { this.colName = colName; this.value = value; }
+    public string colName
+    {
+        get;
+        set;
+    }
+    public object value
+    {
+        get;
+        set;
+    }
+    public Yep(string colName, object value)
+    {
+        this.colName = colName; this.value = value;
+    }
 }
 
 public class User
 {
-    public User(){
+    public User()
+    {
         this.Email = "";
         this.First = "";
         this.Last = "";

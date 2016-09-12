@@ -114,6 +114,7 @@ $(document).one('pagebeforecreate', function () {
             }
             res = $('<li>').attr({ id: data[i].MenuOption.trim() }).html($('<a href="' + data[i].Href.trim() + '" _href="' + data[i].Href.trim() + '">').text(data[i].MenuOption.trim()).attr(JSON.parse(data[i].Attributes)).prop('outerHTML')).prop('outerHTML');
             $('#menuList').append(res);
+            setMenu("#index",_user);
         }
         $("#menuList").listview("refresh");
 
@@ -128,6 +129,8 @@ $(document).one('pagebeforecreate', function () {
     sliderStart('#myorders');// init slider
     sliderStart('#index');// init slider
     sliderStart('#branches');// init slider
+    sliderStart('#uploadphoto');// init slider
+
 
 
 }); //this function is dynamiclly define the panel menu 
@@ -153,6 +156,18 @@ $(document).on("pageshow", "#myorders", function (event) {
         $("#myOrdersListCollapsible").collapsibleset("refresh"); // refresh collapsible
     }
 }); // init myorders page
+
+$(document).on("pagecreate", "#uploadphoto", function () {
+    $(".photopopup").on({
+        popupbeforeposition: function () {
+            var maxHeight = $(window).height() - 60 + "px";
+            $(".photopopup img").css("max-height", maxHeight);
+    
+        }
+    });
+    $(".photopopup").popup();
+});
+
 $(document).on("pageshow", "#uploadphoto", function (event) {
     if (!validateUser(_user)) {
         $.mobile.changePage('#index');
@@ -472,31 +487,37 @@ function buildBlock(id, inputType, isMinified, label, _class, onlyLabel) {
 
 function uploadPic(path) {
     function win(r) {
-        alert("Code = " + responseText);
-        console.log("Response = " + r.response);
-        console.log("Sent = " + r.bytesSent);
+        var staticURL = 'http://proj.ruppin.ac.il';
+        var imgBlk = $('<img>').attr({ 'src': staticURL + r.response, 'alt': r.response, class: 'picAlB' }).click(function () {
+            $('#popupPhotoLandscape img').att('href', $(this).attr('src'));
+            $(this).wrap($('<a>').attr('src','#popupPhotoLandscape'));
+        });
+        alert(staticURL + r.response);
+        $('#progressBar').html("");
+        $('#progressBar').append('<span></span>');
+        $('#picsContainer').append(imgBlk);
+
     }
 
     function fail(error) {
-        alert(error.responseText);
-        console.log("upload error source " + error.source);
-        console.log("upload error target " + error.target);
+        alert(error.target+" " + error.code +" "+ error.source);
+        $('#progressBar').html("");
+        $('#progressBar').append('<span></span>');
     }
 
     var uri = encodeURI("http://proj.ruppin.ac.il/cegroup3/prod/uploadHandler.ashx");
-
+    $('#progressBar').append('<i class="fa fa-spinner fa-spin"></i>');
     var options = new FileUploadOptions();
     options.fileKey = "file";
     options.fileName = path.substr(path.lastIndexOf('/') + 1);
     options.mimeType = "image/jpeg";
-    options.email = _user.Email;
-    options.SessionID = _user._token;
+    options.params = { email: _user.Email, sessionid: _user._token };
     var ft = new FileTransfer();
     ft.onprogress = function (progressEvent) {
         if (progressEvent.lengthComputable) {
-            $('#progressBar').text(progressEvent.loaded / progressEvent.total);
+            $('#progressBar span').text(((progressEvent.loaded / progressEvent.total)*100).toFixed(0));
         } else {
-            $('#progressBar').text('Uploading...');
+            $('#progressBar span').text('Uploading...');
         }
     };
     ft.upload(path, uri, win, fail, options);
@@ -554,7 +575,7 @@ function sendSignup() {
         setTimeout(function () {
             $('#qtip-userInfo').remove();
         }, 10000);
-        $('#btnSubmitSignUp').qtip('destroy', true);
+        $('#qtip-userInfo').qtip('destroy', true);
         $.mobile.changePage('#index');
 
 

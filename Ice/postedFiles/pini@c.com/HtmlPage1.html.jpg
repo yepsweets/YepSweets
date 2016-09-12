@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <link href="style/font-awesome-4.6.3/css/font-awesome.css" rel="stylesheet" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript">
+
+        //var files = $("#YOURUPLOADCTRLID").get(0).files;
+
+        // Add the uploaded image content to the form data collection
+        //if (files.length > 0) {
+        //    data.append("UploadedFile", files[0]);
+        //}
+        $(document).ready(function () {
+            $('#btn').click(upload);
+        }
+            );
+        function upload() {
+            var data = new FormData(),
+            file = $("#fileUpload")[0].files[0];
+
+            data.append("email", 'pini@c.com');
+            data.append("sessionid", '7619');
+
+            data.append("name", file.name);
+            data.append("size", file.size);
+            data.append("type", file.type);
+            data.append("file", file);
+            //data.append("UploadedFile", path);
+
+            //Make Ajax request with the contentType = false, and procesDate = false
+            $.ajax({
+                type: 'POST',
+                url: 'uploadHandler.ashx',
+                data: data,
+                async: false,
+                success: function (data) {
+                    alert((data.d) + ' success');
+                },
+                error: function (e, r, rr) {
+                    alert('  error');
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+
+        }
+
+        $('#mybtn').click();
+
+
+    </script>
+
+
+
+</head>
+<body>
+    <i class="fa fa-camera-retro fa-2x myIcon" title="Edit"></i>
+    <input id="fileUpload" type="file" />
+    <input id="btn" type="button" value="submit" />
+
+</body>
+</html>
+
+
+
+
+<!--<div data-role="panel" id="menu" data-position="right" data-display="push">
+    <ul data-role="listview" id="menuList">
+    <li><div id="statusBar"><div id="containerStatusBar"></div></div></li>
+    <li id="HOME"><a href="#index">HOME</a></li>
+    <li id="BRANCHS"><a href="#branches">BRANCHS</a></li>
+    </ul>
+</div>-->

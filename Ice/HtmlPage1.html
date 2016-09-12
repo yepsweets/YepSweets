@@ -20,6 +20,9 @@
             var data = new FormData(),
             file = $("#fileUpload")[0].files[0];
 
+            data.append("email", 'pini@c.com');
+            data.append("sessionid", '7619');
+
             data.append("name", file.name);
             data.append("size", file.size);
             data.append("type", file.type);
