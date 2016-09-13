@@ -242,7 +242,13 @@
                 <div class="body-post">
                     <div class="ui-grid-solo">
                         <p class="else">Upload Your Photo Now: <input id="btnTake" type="button" value="camera" /></p>
-                        <p style="background-color:yellow;height:25px;width:25px;" class="" id="progressBar"></p>
+                        <p style="margin:0 auto;" id="progressBar"><span></span></p>
+                        <div id="picsContainer">
+                            
+                        </div>
+                        <div data-role="popup" id="popupPhotoLandscape" class="photopopup" data-overlay-theme="a" data-corners="false" data-tolerance="30,15">
+                            <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a><img src="" alt="Photo landscape">
+                        </div>
                     </div>
                 </div>
             </div>
